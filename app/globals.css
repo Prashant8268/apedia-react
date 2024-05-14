@@ -2,11 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 .cta-buttons {
-  margin-top: 20px;
+  display: flex;
 }
 
 .cta-button {
-  display: inline-block;
   text-decoration: none;
   background-color: #36a2b7;
   color: #fff;
@@ -17,7 +16,6 @@
   transition: background-color 0.3s;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
   text-align: center;
-  text-transform: uppercase;
 }
 
 .cta-button:hover {
