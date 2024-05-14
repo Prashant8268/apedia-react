@@ -1,0 +1,127 @@
+/* SignIn.module.css */
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    /* margin: 0; */
+    background-color: #f2f6ff;
+    /* background-image: url('../../assets/background.webp'); */
+    background-size: 'cover' ;
+
+}
+
+.sign-in-container {
+    background-color: #fff;
+    max-width: 500px; 
+    padding: 40px; 
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.heading {
+    font-size: 28px;
+    color: #0078d4; 
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin: 20px 0;
+    text-align: left; 
+}
+
+.label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.input-icon {
+    display: flex;
+    align-items: center;
+}
+
+.input {
+    flex: 1; 
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    padding-left: 35px;
+    margin-left: 5px;
+    transition: border-color 0.3s; 
+    outline: none;
+}
+
+.input:focus {
+    border: 2px solid ;
+    border-color: #0078d4; 
+}
+
+
+/* Style for the Sign In button */
+.body{
+    /* background-image: url('../../assets/background.webp'); */
+    background-size: 'cover' ;
+  }
+.sign-in-button {
+    background-color: #36a2b7;
+    color: #fff;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    width: 100%;
+    font-size: 18px;
+    margin-top: 20px;
+}
+
+.sign-in-button:hover {
+    background-color: #005a9e; 
+}
+
+/* Style for action links */
+.action-links {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #555;
+}
+
+.action-links a {
+    text-decoration: none;
+    color: #0078d4;
+    font-weight: bold;
+    margin: 0 10px;
+}
+
+.action-links a:hover {
+    text-decoration: underline;
+}
+
+/* Add media query for mobile responsiveness */
+@media (max-width: 768px) {
+    .container {
+        background-size: cover; 
+    }
+
+    .sign-in-container {
+        max-width: 90%; 
+        padding: 15px; 
+    }
+    .input{
+        padding: 6px;
+    }
+
+    .heading {
+        font-size: 24px; 
+    }
+
+}

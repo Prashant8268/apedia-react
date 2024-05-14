@@ -1,0 +1,63 @@
+.header {
+    background-color: #0078d4;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+}
+.background{
+    background: linear-gradient(to bottom, rgba(0, 120, 212, 0.8), rgba(0, 94, 162, 0.8));
+    box-shadow: 0 0 20px rgba(0, 120, 212, 0.5);
+    border: 1px solid #0078d4;
+    color: white;
+    text-shadow: 1px 1px 3px #0078d4;
+    background-color: rgba(0, 120, 212, 0.5);
+    background-blend-mode: multiply;
+    /* background-image: url('your-image.jpg'); */
+    }
+
+.name{
+    font-family: 'Major Mono Display', monospace;;
+}
+.title {
+    font-size: 36px;
+    color: white;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    padding: 20px;
+    flex-direction: column;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center; 
+}
+
+.app-image {
+    height: 200px;
+    width: 200px;
+}
+
+.cta-buttons {
+    margin-top: 20px;
+}
+
+.cta-button {
+    display: inline-block;
+    text-decoration: none;
+    background-color: #36a2b7;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin: 10px;
+    font-weight: bold;
+    transition: background-color 0.3s;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.cta-button:hover {
+    background-color: #0078d4;
+}
