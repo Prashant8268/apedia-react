@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 const SignUp = () => {
     return (
-        <div className="flex justify-center items-center pt-10 pb-5 min-h-screen bg-blue-100">
+        <div className="flex justify-center items-center pt-10 pb-5 min-h-screen bg-gradient-to-br from-blue-400 to-purple-500">
             <div className="bg-white max-w-md p-8 rounded-lg shadow-md">
                 <h1 className="text-3xl text-blue-500 mb-6 text-center">Sign Up to <span className="text-yellow-400">Apedia</span></h1>
                 <form>
