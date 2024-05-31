@@ -2,13 +2,17 @@
 import { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faComment, faTrash, faEllipsisV, faLink } from '@fortawesome/free-solid-svg-icons';
+import { useRouter } from 'next/navigation';
 
 const Posts = () => {
+    const router = useRouter();
+
     // Dummy data for posts
     const dummyPosts = [
         {
             id: 1,
             username: 'JohnDoe',
+            profilePic: 'https://via.placeholder.com/50',
             content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
             likes: 10,
             comments: [
@@ -25,6 +29,7 @@ const Posts = () => {
         {
             id: 2,
             username: 'JaneSmith',
+            profilePic: 'https://via.placeholder.com/50',
             content: 'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.',
             likes: 20,
             comments: [
@@ -121,13 +126,31 @@ const Posts = () => {
         setOpenPostMenu(null);
     };
 
+    // Function to handle user profile click
+    const handleProfileClick = (username) => {
+        router.push(`/profile/${username}`);
+    };
+
     return (
         <div className="bg-gray-100 p-6 rounded-lg">
             <h1 className="text-3xl font-bold mb-6">Posts</h1>
             {dummyPosts.map(post => (
                 <div key={post.id} className="bg-white rounded-lg shadow-md p-6 mb-6 relative">
                     <div className="flex justify-between items-center mb-4">
-                        <p className="text-lg font-semibold">{post.username}</p>
+                        <div className="flex items-center">
+                            <img
+                                src={post.profilePic}
+                                alt={post.username}
+                                className="w-10 h-10 rounded-full  cursor-pointer border border-black border-opacity-100"
+                                onClick={() => handleProfileClick(post.username)}
+                            />
+                            <p
+                                className="text-lg font-semibold ml-4 cursor-pointer"
+                                onClick={() => handleProfileClick(post.username)}
+                            >
+                                {post.username}
+                            </p>
+                        </div>
                         <button onClick={() => handlePostMenu(post.id)} className="text-gray-500 hover:text-gray-800">
                             <FontAwesomeIcon icon={faEllipsisV} />
                         </button>

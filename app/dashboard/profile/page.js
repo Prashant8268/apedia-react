@@ -1,6 +1,6 @@
-"use client";
+"use client"
 import { useEffect, useState } from 'react';
-
+import Posts from '../posts/page';
 // Mock data fetching function for initial data
 const fetchProfileData = async () => {
     return {
@@ -36,34 +36,21 @@ const Profile = () => {
     const { user, profile_user } = profileData;
 
     return (
-        <div className="bg-gradient-to-br from-blue-400 to-purple-400 text-white min-h-screen py-8 flex items-center justify-center p-4">
+        <div className="bg-gray-100 text-white min-h-screen py-8">
             <div className="container mx-auto px-4">
-                <div className="flex flex-col items-center bg-white text-black p-6 md:p-8 rounded-lg shadow-lg w-full max-w-md">
-                    <img
-                        src={user.avatar}
-                        alt={user.name}
-                        className="w-32 h-32 rounded-full mb-4 border-4 border-white"
-                    />
+                <div className="mx-auto bg-white text-black p-6 md:p-8 rounded-lg shadow-lg w-full max-w-md flex flex-col items-center">
+                    <div className="w-32 h-32 rounded-full mb-4 border-4 border-black flex justify-center items-center">
+                        <img
+                            src={user.avatar}
+                            alt={user.name}
+                            className="w-28 h-28 rounded-full"
+                        />
+                    </div>
                     <h1 className="text-3xl font-bold text-blue-500">{user.name}</h1>
                     <p className="text-gray-700">{user.email}</p>
 
                     {user.id === profile_user.id ? (
                         <>
-                            <div className="w-full mt-6">
-                                <h3 className="text-xl mb-4">Create A New Post</h3>
-                                <form action="/create-post" method="POST">
-                                    <textarea
-                                        name="content"
-                                        id="new-post-form"
-                                        cols="30"
-                                        rows="4"
-                                        placeholder="Start Typing Your Thoughts"
-                                        className="w-full p-2 border rounded"
-                                    ></textarea>
-                                    <button className="btn-primary mt-4 bg-blue-500 text-white px-4 py-2 rounded">Create Post</button>
-                                </form>
-                            </div>
-
                             <div className="w-full mt-6">
                                 <h3 className="text-xl mb-4">Update Profile</h3>
                                 <form action={`/update/${profile_user.id}`} enctype="multipart/form-data" method="POST">
@@ -73,7 +60,14 @@ const Profile = () => {
                                         value={profile_user.name}
                                         required
                                         placeholder="Your Name"
-                                        className="w-full p-2 mb-2 border rounded"
+                                        className="w-full p-2 mb-2 border border-gray-300 rounded"
+                                        onChange={(e) => setProfileData(prevState => ({
+                                            ...prevState,
+                                            profile_user: {
+                                                ...prevState.profile_user,
+                                                name: e.target.value
+                                            }
+                                        }))}
                                     />
                                     <input
                                         type="email"
@@ -81,13 +75,20 @@ const Profile = () => {
                                         value={profile_user.email}
                                         required
                                         placeholder="Your Email"
-                                        className="w-full p-2 mb-2 border rounded"
+                                        className="w-full p-2 mb-2 border border-gray-300 rounded"
+                                        onChange={(e) => setProfileData(prevState => ({
+                                            ...prevState,
+                                            profile_user: {
+                                                ...prevState.profile_user,
+                                                email: e.target.value
+                                            }
+                                        }))}
                                     />
                                     <input
                                         type="file"
                                         name="avatar"
                                         placeholder="Profile Picture"
-                                        className="w-full p-2 mb-2 border rounded"
+                                        className="w-full p-2 mb-2 border border-gray-300 rounded"
                                     />
                                     <input
                                         type="submit"
@@ -105,6 +106,7 @@ const Profile = () => {
                     )}
                 </div>
             </div>
+            <Posts />
         </div>
     );
 };
