@@ -36,7 +36,7 @@ const Profile = () => {
     const { user, profile_user } = profileData;
 
     return (
-        <div className="bg-gray-100 text-white min-h-screen py-8">
+        <div className="bg-gray-100  min-h-screen py-8">
             <div className="container mx-auto px-4">
                 <div className="mx-auto bg-white text-black p-6 md:p-8 rounded-lg shadow-lg w-full max-w-md flex flex-col items-center">
                     <div className="w-32 h-32 rounded-full mb-4 border-4 border-black flex justify-center items-center">

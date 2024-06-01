@@ -1,55 +1,105 @@
-// pages/friends.js
-
-"use client";
+"use client"
 import { useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCheck, faTimes, faUser } from '@fortawesome/free-solid-svg-icons';
+import { useRouter } from 'next/navigation';
 
 const Friends = () => {
-    const [searchQuery, setSearchQuery] = useState('');
+    const router = useRouter();
+
+    // Dummy data for friend requests and friend list
     const [friendRequests, setFriendRequests] = useState([
-        { id: 1, name: 'Friend Request 1' },
-        { id: 2, name: 'Friend Request 2' },
-        { id: 3, name: 'Friend Request 3' }
+        { id: 1, username: 'Alice', profilePic: 'https://via.placeholder.com/50' },
+        { id: 2, username: 'Bob', profilePic: 'https://via.placeholder.com/50' },
     ]);
-    const [friendsList, setFriendsList] = useState([
-        { id: 1, name: 'Friend 1' },
-        { id: 2, name: 'Friend 2' },
-        { id: 3, name: 'Friend 3' }
+    const [friends, setFriends] = useState([
+        { id: 3, username: 'Charlie', profilePic: 'https://via.placeholder.com/50' },
+        { id: 4, username: 'Dave', profilePic: 'https://via.placeholder.com/50' },
     ]);
+
+    // Function to handle accept friend request
+    const handleAccept = (id) => {
+        const acceptedFriend = friendRequests.find(request => request.id === id);
+        setFriends([...friends, acceptedFriend]);
+        setFriendRequests(friendRequests.filter(request => request.id !== id));
+    };
+
+    // Function to handle reject friend request
+    const handleReject = (id) => {
+        setFriendRequests(friendRequests.filter(request => request.id !== id));
+    };
+
+    // Function to handle user profile click
+    const handleProfileClick = (username) => {
+        router.push(`/profile/${username}`);
+    };
 
     return (
-        <div className="bg-gradient-to-br from-blue-400 to-purple-400 text-white min-h-screen py-8">
-            <div className="container mx-auto px-4">
-                {/* Search Bar */}
-                <input
-                    type="text"
-                    placeholder="Search friends..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full px-4 py-2 rounded mb-4"
-                />
+        <div className="bg-gray-100 p-6 rounded-lg flex justify-center">
+            <div className="max-w-md w-full">
+                <h1 className="text-3xl font-bold mb-6 text-center">Friends</h1>
 
-                {/* Friend Requests */}
-                <div className="mb-8 text-white">
-                    <h2 className="text-xl font-bold mb-4">Friend Requests</h2>
-                    {friendRequests.map(request => (
-                        <div key={request.id} className="flex items-center justify-between bg-gray-100 p-4 rounded shadow-md mb-2">
-                            <p className="text-black">{request.name}</p>
-                            <div className="space-x-2">
-                                <button className="bg-blue-500 text-white px-4 py-2 rounded">Accept</button>
-                                <button className="bg-red-500 text-white px-4 py-2 rounded">Reject</button>
+                <div className="bg-white p-4 rounded-lg shadow-md mb-6">
+                    <h2 className="text-xl font-semibold mb-4">Friend Requests</h2>
+                    {friendRequests.length === 0 ? (
+                        <p className="text-gray-600">No friend requests.</p>
+                    ) : (
+                        friendRequests.map(request => (
+                            <div key={request.id} className="flex items-center justify-between mb-4">
+                                <div className="flex items-center">
+                                    <img
+                                        src={request.profilePic}
+                                        alt={request.username}
+                                        className="w-10 h-10 rounded-full cursor-pointer border border-black border-opacity-100"
+                                        onClick={() => handleProfileClick(request.username)}
+                                    />
+                                    <p
+                                        className="text-lg font-semibold ml-4 cursor-pointer"
+                                        onClick={() => handleProfileClick(request.username)}
+                                    >
+                                        {request.username}
+                                    </p>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <button onClick={() => handleAccept(request.id)} className="text-green-500 hover:text-green-700">
+                                        <FontAwesomeIcon icon={faCheck} />
+                                    </button>
+                                    <button onClick={() => handleReject(request.id)} className="text-red-500 hover:text-red-700">
+                                        <FontAwesomeIcon icon={faTimes} />
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))
+                    )}
                 </div>
 
-                {/* Friends List */}
-                <div>
-                    <h2 className="text-xl font-bold mb-4">Friends</h2>
-                    {friendsList.map(friend => (
-                        <div key={friend.id} className="flex items-center justify-between bg-gray-100 p-4 rounded shadow-md mb-2">
-                            <p className="text-black">{friend.name}</p>
-                        </div>
-                    ))}
+                <div className="bg-white p-4 rounded-lg shadow-md">
+                    <h2 className="text-xl font-semibold mb-4">Friends List</h2>
+                    {friends.length === 0 ? (
+                        <p className="text-gray-600">No friends added.</p>
+                    ) : (
+                        friends.map(friend => (
+                            <div key={friend.id} className="flex items-center justify-between mb-4">
+                                <div className="flex items-center">
+                                    <img
+                                        src={friend.profilePic}
+                                        alt={friend.username}
+                                        className="w-10 h-10 rounded-full cursor-pointer border border-black border-opacity-100"
+                                        onClick={() => handleProfileClick(friend.username)}
+                                    />
+                                    <p
+                                        className="text-lg font-semibold ml-4 cursor-pointer"
+                                        onClick={() => handleProfileClick(friend.username)}
+                                    >
+                                        {friend.username}
+                                    </p>
+                                </div>
+                                <button className="text-gray-500 hover:text-gray-700">
+                                    <FontAwesomeIcon icon={faUser} />
+                                </button>
+                            </div>
+                        ))
+                    )}
                 </div>
             </div>
         </div>
