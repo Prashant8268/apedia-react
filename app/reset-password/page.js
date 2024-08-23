@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
@@ -12,15 +12,22 @@ import {
 
 const ResetPassword = () => {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const token = searchParams.get("token");
-
+  const [token, setToken] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  useEffect(() => {
+    // Check if the window is defined to ensure client-side execution
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      const tokenValue = searchParams.get("token");
+      setToken(tokenValue);
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -66,7 +73,7 @@ const ResetPassword = () => {
             <FontAwesomeIcon
               icon={faCheckCircle}
               className="text-green-500 w-16 h-16 mb-4"
-              size="3x" // Ensures the icon has a consistent size
+              size="3x"
             />
             <p className="text-green-500">{message}</p>
           </div>
@@ -86,6 +93,11 @@ const ResetPassword = () => {
                 className="w-full pl-2 py-2 border border-gray-300 rounded focus:outline-none"
                 required
               />
+              <FontAwesomeIcon
+                icon={showPassword ? faEyeSlash : faEye}
+                onClick={toggleShowPassword}
+                className="absolute right-3 top-8 text-gray-400 cursor-pointer"
+              />
             </div>
             <div className="mb-4 relative">
               <label htmlFor="confirmPassword" className="text-gray-700">
@@ -100,6 +112,11 @@ const ResetPassword = () => {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="w-full pl-2 py-2 border border-gray-300 rounded focus:outline-none"
                 required
+              />
+              <FontAwesomeIcon
+                icon={showConfirmPassword ? faEyeSlash : faEye}
+                onClick={toggleShowConfirmPassword}
+                className="absolute right-3 top-8 text-gray-400 cursor-pointer"
               />
             </div>
             <button
