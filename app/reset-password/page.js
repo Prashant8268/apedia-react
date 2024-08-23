@@ -93,11 +93,6 @@ const ResetPassword = () => {
                 className="w-full pl-2 py-2 border border-gray-300 rounded focus:outline-none"
                 required
               />
-              <FontAwesomeIcon
-                icon={showPassword ? faEyeSlash : faEye}
-                onClick={toggleShowPassword}
-                className="absolute right-3 top-8 text-gray-400 cursor-pointer"
-              />
             </div>
             <div className="mb-4 relative">
               <label htmlFor="confirmPassword" className="text-gray-700">
@@ -113,11 +108,7 @@ const ResetPassword = () => {
                 className="w-full pl-2 py-2 border border-gray-300 rounded focus:outline-none"
                 required
               />
-              <FontAwesomeIcon
-                icon={showConfirmPassword ? faEyeSlash : faEye}
-                onClick={toggleShowConfirmPassword}
-                className="absolute right-3 top-8 text-gray-400 cursor-pointer"
-              />
+
             </div>
             <button
               type="submit"
