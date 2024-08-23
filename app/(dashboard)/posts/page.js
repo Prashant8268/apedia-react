@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faComment, faTrash, faEllipsisV, faLink } from '@fortawesome/free-solid-svg-icons';
 import { useRouter } from 'next/navigation';
+import PostForm from '@/app/_componets/PostForm';
 
 const Posts = () => {
     const router = useRouter();
@@ -50,9 +51,6 @@ const Posts = () => {
     const [commentsToShow, setCommentsToShow] = useState({});
     // State to manage open post menu
     const [openPostMenu, setOpenPostMenu] = useState(null);
-    // State to manage new post input
-    const [newPostContent, setNewPostContent] = useState('');
-
     const menuRef = useRef(null);
 
     useEffect(() => {
@@ -137,39 +135,10 @@ const Posts = () => {
         router.push(`/profile/${username}`);
     };
 
-    // Function to handle new post form submission
-    const handleNewPostSubmit = (e) => {
-        e.preventDefault();
-        const newPost = {
-            id: dummyPosts.length + 1,
-            username: 'CurrentUser', // Replace with the actual username
-            profilePic: 'https://via.placeholder.com/50', // Replace with the actual profile picture URL
-            content: newPostContent,
-            likes: 0,
-            comments: []
-        };
-        setDummyPosts([newPost, ...dummyPosts]);
-        setNewPostContent('');
-    };
-
     return (
         <div className="bg-gray-100 p-6 rounded-lg">
             <h1 className="text-3xl font-bold mb-6">Posts</h1>
-
-            <form onSubmit={handleNewPostSubmit} className="bg-white p-4 rounded-lg shadow-md mb-6 max-w-md">
-                <textarea
-                    value={newPostContent}
-                    onChange={(e) => setNewPostContent(e.target.value)}
-                    placeholder="What's on your mind?"
-                    className="w-full p-2 border rounded-lg mb-2"
-                    rows="4"
-                    required
-                />
-                <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg">
-                    Post
-                </button>
-            </form>
-
+            <PostForm  />
             {dummyPosts.map(post => (
                 <div key={post.id} className="bg-white rounded-lg shadow-md p-6 mb-6 relative">
                     <div className="flex justify-between items-center mb-4">
