@@ -29,9 +29,9 @@ export async function POST(req, res) {
     }
 
     // Asynchronously send the email
-    setImmediate(() => {
+    setImmediate(async () => {
       try {
-        sendResetEmail(email, resetToken);
+        await sendResetEmail(email, resetToken);
       } catch (error) {
         console.error("Error sending reset email:", error);
       }
