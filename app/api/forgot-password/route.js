@@ -1,8 +1,9 @@
 import dbConnect from "@/lib/mongodb";
 import { generateResetToken, saveResetToken } from "../../../lib/resetToken";
-import { sendResetEmail } from "../../../lib/nodemailer";
 import { NextResponse } from "next/server";
 import User from "../../../models/User";
+import { Worker } from "worker_threads";
+import path from "path";
 
 export async function POST(req, res) {
   if (req.method === "POST") {
@@ -28,12 +29,24 @@ export async function POST(req, res) {
       });
     }
 
-    // Asynchronously send the email
-    setImmediate(async () => {
-      try {
-        await sendResetEmail(email, resetToken);
-      } catch (error) {
-        console.error("Error sending reset email:", error);
+    // Offload email sending to a worker thread
+    const worker = new Worker(path.resolve("./workers/nodemailer.js"), {
+      workerData: { email, resetToken },
+    });
+
+    worker.on("message", (message) => {
+      if (!message.success) {
+        console.error("Worker failed to send email:", message.error);
+      }
+    });
+
+    worker.on("error", (error) => {
+      console.error("Worker thread error:", error);
+    });
+
+    worker.on("exit", (code) => {
+      if (code !== 0) {
+        console.error(`Worker stopped with exit code ${code}`);
       }
     });
 

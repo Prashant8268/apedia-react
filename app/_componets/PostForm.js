@@ -28,9 +28,8 @@ const PostForm = () => {
       if (selectedFile) {
         formData.append("photo", selectedFile);
       }
-
       // Send the form data to the server
-      await axios.post("/api/posts", formData, {
+      await axios.post("/api/new-post", {content:newPostContent, file:selectedFile}, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

@@ -1,7 +1,8 @@
-// utils/email.js
-import nodemailer from "nodemailer";
+// workers/emailWorker.js
+const { parentPort, workerData } = require("worker_threads");
+const nodemailer = require("nodemailer");
 
-export async function sendResetEmail(email, resetToken) {
+async function sendResetEmail({ email, resetToken }) {
   const transporter = nodemailer.createTransport({
     service: "Gmail",
     auth: {
@@ -38,9 +39,11 @@ export async function sendResetEmail(email, resetToken) {
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log("Email sent successfully");
+    parentPort.postMessage({ success: true });
   } catch (error) {
     console.error("Error sending reset email:", error);
-    throw new Error("Error sending reset email.");
+    parentPort.postMessage({ success: false, error: error.message });
   }
 }
+
+sendResetEmail(workerData);
