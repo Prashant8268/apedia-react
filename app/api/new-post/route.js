@@ -26,8 +26,8 @@ export async function POST(req) {
   }
 
   await dbConnect();
-//   let data = await req.json();
   console.log( await req.body,req.file,'data')
+  let data = await req.json();
 
   try {
     // Handle file upload
@@ -61,9 +61,3 @@ export async function POST(req) {
     });
   }
 }
-
-export const config = {
-  api: {
-    bodyParser: false, // Disables body parsing so Multer can handle it
-  },
-};
