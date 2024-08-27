@@ -30,9 +30,12 @@ export async function POST(req, res) {
     }
 
     // Offload email sending to a worker thread
-    const worker = new Worker(path.resolve("./workers/nodemailer.js"), {
-      workerData: { email, resetToken },
-    });
+    const worker = new Worker(
+      path.resolve("./lib/nodemailer.js"),
+      {
+        workerData: { email, resetToken },
+      }
+    );
 
     worker.on("message", (message) => {
       if (!message.success) {
