@@ -36,7 +36,6 @@ const SignUp = () => {
         password,
         name,
       });
-      console.log(response, "response");
       if (response) {
         router.push("/signIn");
       }

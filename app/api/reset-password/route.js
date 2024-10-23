@@ -8,7 +8,6 @@ export async function POST(req, res) {
     const { token, password } = await req.json();
 
     await dbConnect();
-    console.log(password, "*");
     // Find the reset token
     const resetToken = await ResetToken.findOne({ token });
     if (!resetToken || resetToken.expiresAt < new Date()) {

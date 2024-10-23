@@ -17,10 +17,11 @@ const SignIn = () => {
     e.preventDefault();
     try {
       setIsLoading(true);
-      setError(""); // Clear previous errors
+      setError(""); 
 
       const response = await axios.post("/api/signin", { email, password });
       if (response.status === 200) {
+        localStorage.setItem("jwt", response.data.jwt);
         router.push("/posts");
       } else {
         setError("Invalid email or password."); // Set error if response is not 200

@@ -46,6 +46,7 @@ export async function POST(req) {
       {
         message: "Sign in successful",
         user: { email: user.email, username: user.username },
+        jwt:token
       },
       { status: 200 }
     );

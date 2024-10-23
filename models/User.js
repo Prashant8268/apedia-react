@@ -24,7 +24,12 @@ const userSchema = new mongoose.Schema(
     avatar: {
       type: String,
     },
-    // Add fields for password reset functionality
+    posts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Post",
+      },
+    ],
     resetToken: {
       type: String,
       default: null,
