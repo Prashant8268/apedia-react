@@ -10,11 +10,6 @@ import { NextResponse } from "next/server";
 // Define the path to the uploads directory
 const AVATAR_PATH = path.join(process.cwd(), "public/uploads/posts");
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
 
 export async function GET(req, { params }) {
   const { id } = params;
