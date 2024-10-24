@@ -112,7 +112,7 @@ const PostItem = ({ post, setPosts, handleProfileClick }) => {
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center">
           <img
-            src={post.profilePic}
+            src={``}
             alt={post.user.name}
             className="w-10 h-10 rounded-full cursor-pointer border border-gray-300"
             onClick={() => handleProfileClick(post.user.name)}

@@ -5,9 +5,9 @@ import jwt from "jsonwebtoken";
 import Post from "@/models/Post";
 import User from "@/models/User";
 import dbConnect from "@/lib/mongodb";
-
+import s3Client from "@/lib/s3";
 // Path to save uploaded photos
-const AVATAR_PATH = path.join("public/uploads/posts");
+const AVATAR_PATH = path.join("tem_store/uploads/posts");
 
 export async function POST(req) {
   // Connect to the database
@@ -41,7 +41,7 @@ export async function POST(req) {
   };
 
   if (photo) {
-    const photoUrl = await savePhoto(photo);
+    const photoUrl = await uploadToS3(photo);
     postDetails.photoUrl = photoUrl;
   }
 
@@ -65,16 +65,34 @@ export async function POST(req) {
   }
 }
 
-// Function to save the photo to the server
-async function savePhoto(photo) {
+// Function to upload the photo to S3
+// Function to upload the photo to S3
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+// import s3Client from "@/lib/s3Client";
+
+// Function to upload the photo to S3
+async function uploadToS3(photo) {
   const sanitizedPhotoName = photo.name.replace(/\s+/g, "_");
   const photoName = `${Date.now()}_${sanitizedPhotoName}`;
-  const photoPath = path.join(process.cwd(), AVATAR_PATH, photoName);
 
+  // Convert the photo to a buffer
   const buffer = Buffer.from(await photo.arrayBuffer());
 
-  await fs.writeFile(photoPath, buffer);
-  // console.log("Photo saved successfully:", photoPath);
+  const params = {
+    Bucket: process.env.AWS_S3_BUCKET_NAME, 
+    Key: `uploads/posts/${photoName}`,
+    Body: buffer,
+    ContentType: photo.type,
+  };
 
-  return `/uploads/posts/${photoName}`;
+  try {
+    const command = new PutObjectCommand(params);
+    await s3Client.send(command);
+    return `https://${process.env.AWS_S3_BUCKET_NAME}.s3.amazonaws.com/uploads/posts/${photoName}`; // Construct the URL of the uploaded image
+  } catch (error) {
+    console.error("Error uploading to S3:", error);
+    throw new Error("Failed to upload to S3");
+  }
 }
+
+
