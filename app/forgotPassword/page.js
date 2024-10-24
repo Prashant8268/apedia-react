@@ -4,12 +4,13 @@ import { faEnvelope, faCheckCircle } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 import { useState } from "react";
 import axios from "axios";
-
+import { useRouter } from "next/navigation";
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,11 +19,16 @@ const ForgotPassword = () => {
 
     try {
       const res = await axios.post("/api/forgot-password", { email });
-      const data = res.data; 
+      const data = res.data;
 
       if (data.status === 200) {
         setSuccess(true);
         setMessage("Reset link sent to your email address.");
+
+        // Redirect to sign-in page after 3 seconds
+        setTimeout(() => {
+          router.push("/signIn");
+        }, 3000);
       } else {
         setMessage(data.message || "Error sending reset email.");
       }
@@ -92,6 +98,7 @@ const ForgotPassword = () => {
             <p className="text-green-500 text-xl mt-4">
               Reset link sent to your email address.
             </p>
+            <p className="text-gray-500 mt-2">Redirecting to sign-in page...</p>
           </div>
         )}
         {!success && (

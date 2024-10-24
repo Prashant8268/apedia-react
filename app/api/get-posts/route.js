@@ -6,23 +6,24 @@ import { NextResponse } from "next/server";
 import Post from "@/models/Post";
 import Comment from "@/models/Comment";
 import Like from "@/models/Like";
+import verifyToken from "@/lib/verifyToken";
 export async function GET(req) {
   try {
     await dbConnect();
-    const token = req.cookies.get("token");
-    const decode = jwt.verify(token.value, process.env.JWT_SECRET);
-    const userId = decode.userId;
-    const posts = await Post.find({ user: userId })
-      .populate("user", "name avatar") 
+    const tokenResponse = await verifyToken(req);
+    if (tokenResponse) return tokenResponse;
+    const userId = req.user.userId;
+    const posts = await Post.find()
+      .populate("user", "name avatar")
       .populate({
         path: "comments",
         populate: {
           path: "user",
-          select: "name avatar", 
+          select: "name avatar",
         },
       })
       .populate({
-        path: "likes", 
+        path: "likes",
         populate: {
           path: "user", // Populate user for each like
           select: "name avatar", // Select fields to populate

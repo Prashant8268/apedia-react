@@ -6,7 +6,6 @@ import { NextResponse } from "next/server";
 export async function POST(req, res) {
   if (req.method === "POST") {
     const { token, password } = await req.json();
-
     await dbConnect();
     // Find the reset token
     const resetToken = await ResetToken.findOne({ token });

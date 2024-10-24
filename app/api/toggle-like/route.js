@@ -5,8 +5,8 @@ import Like from "@/models/Like";
 import Post from "@/models/Post";
 import Comment from "@/models/Comment";
 import { NextResponse } from "next/server";
-import jwt from 'jsonwebtoken'
-export  async function POST(req, res) {
+import jwt from "jsonwebtoken";
+export async function POST(req, res) {
   await dbConnect(); // Ensure to connect to your database
 
   if (req.method !== "POST") {
@@ -14,20 +14,36 @@ export  async function POST(req, res) {
   }
 
   try {
-    const { id, type ,token } =await req.json(); 
-    const user = jwt.verify(token,process.env.JWT_SECRET);
+    const { id, type, token } = await req.json();
+    const user = jwt.verify(token, process.env.JWT_SECRET);
 
     let likeable;
     let deleted = false;
     if (type == "Post") {
-      likeable = await Post.findById(id).populate("likes");
+      likeable = await Post.findById(id)
+        .populate("likes")
+        .populate("user", "name avatar")
+        .populate({
+          path: "comments",
+          populate: {
+            path: "user",
+            select: "name avatar",
+          },
+        })
+        .populate({
+          path: "likes",
+          populate: {
+            path: "user", 
+            select: "name avatar", 
+          },
+        });
     } else {
       likeable = await Comment.findById(id).populate("likes");
     }
     const existingLike = await Like.findOne({
       likeable: id,
       onModel: type,
-      user: user.userId, 
+      user: user.userId,
     });
 
     if (existingLike) {
@@ -45,17 +61,19 @@ export  async function POST(req, res) {
       await likeable.save();
     }
 
-
     return NextResponse.json({
       message: "Request successful",
       data: {
         deleted: deleted,
         likesCount: likeable.likes.length,
-        likeable
+        likeable,
       },
     });
   } catch (err) {
     console.error(err, "<<- Error in toggle-like handler");
-    return NextResponse.json({ message: "Internal server error" },{status:500});
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

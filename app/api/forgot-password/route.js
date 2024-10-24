@@ -5,8 +5,9 @@ import User from "../../../models/User";
 import { Worker } from "worker_threads";
 import path from "path";
 
-export async function POST(req, res) {
+export async function POST(req) {
   if (req.method === "POST") {
+
     const { email } = await req.json();
     await dbConnect();
 
@@ -30,12 +31,10 @@ export async function POST(req, res) {
     }
 
     // Offload email sending to a worker thread
-    const worker = new Worker(
-      path.resolve("./lib/nodemailer.js"),
-      {
-        workerData: { email, resetToken },
-      }
-    );
+    const worker = new Worker(path.resolve("./lib/nodemailer.js"), {
+      workerData: { email, resetToken },
+    });
+
 
     worker.on("message", (message) => {
       if (!message.success) {

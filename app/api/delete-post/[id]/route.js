@@ -8,17 +8,26 @@ import path from "path";
 import { NextResponse } from "next/server";
 import { DeleteObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
 import s3Client from "@/lib/s3";
+import verifyToken from "@/lib/verifyToken";
 // Define the path to the uploads directory
 const AVATAR_PATH = path.join(process.cwd(), "tem_store/uploads/posts");
 
 export async function GET(req, { params }) {
   const { id } = params;
+  const tokenResponse = await verifyToken(req);
+  if (tokenResponse) return tokenResponse;
+  const user = req.user;
 
   await dbConnect();
 
   try {
     // Find the post by ID and populate comments and likes
     const post = await Post.findById(id).populate("comments likes");
+    if (post.user != user.userId)
+      return NextResponse.json(
+        { message: "Not authorized to Delete Post" },
+        { status: 403 }
+      );
     if (!post) {
       return NextResponse.json({ message: "Post not found" }, { status: 404 });
     }

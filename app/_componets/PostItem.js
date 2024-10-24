@@ -27,7 +27,6 @@ const PostItem = ({ post, setPosts, handleProfileClick }) => {
   useEffect(() => {
     setComments(post.comments);
   }, [post]);
-
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -62,13 +61,15 @@ const PostItem = ({ post, setPosts, handleProfileClick }) => {
         type: "Post",
       });
       const updatedPost = response.data.data.likeable;
+
       // Update post's like count
-      setIsPostLiked((prev) => !prev);
       setPosts((prevPosts) =>
         prevPosts.map((p) => (p._id === updatedPost._id ? updatedPost : p))
       );
     } catch (error) {
       console.error("Error liking post:", error);
+    } finally {
+      setIsPostLiked((prev) => !prev);
     }
   };
 
@@ -196,9 +197,8 @@ const PostItem = ({ post, setPosts, handleProfileClick }) => {
                   <button
                     onClick={() => handleLikeComment(comment._id)}
                     className={`text-gray-500 ${
-                      likedPosts.includes(comment._id)
-                        ? "text-red-500"
-                        : "text-black"
+                         "text-red-500"
+                        //  "text-black"
                     }`}
                   >
                     <FontAwesomeIcon icon={faHeart} /> {comment.likes.length}
@@ -237,7 +237,7 @@ const PostItem = ({ post, setPosts, handleProfileClick }) => {
               type="submit"
               className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
             >
-              Post
+              Comment
             </button>
           </form>
         </div>
