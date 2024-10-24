@@ -2,8 +2,7 @@ import dbConnect from "@/lib/mongodb";
 import { generateResetToken, saveResetToken } from "../../../lib/resetToken";
 import { NextResponse } from "next/server";
 import User from "../../../models/User";
-import { Worker } from "worker_threads";
-import path from "path";
+
 import axios from "axios";
 
 export async function POST(req) {
@@ -35,7 +34,6 @@ export async function POST(req) {
     });
 
     return NextResponse.json({
-      message: "Reset link sent to your email address.",
       status: 200,
     });
   } else {
