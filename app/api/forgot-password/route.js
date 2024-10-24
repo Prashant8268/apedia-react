@@ -4,10 +4,10 @@ import { NextResponse } from "next/server";
 import User from "../../../models/User";
 import { Worker } from "worker_threads";
 import path from "path";
+import axios from "axios";
 
 export async function POST(req) {
   if (req.method === "POST") {
-
     const { email } = await req.json();
     await dbConnect();
 
@@ -29,27 +29,9 @@ export async function POST(req) {
         message: "Error saving reset token.",
       });
     }
-
-    // Offload email sending to a worker thread
-    const worker = new Worker(path.resolve("./lib/nodemailer.js"), {
-      workerData: { email, resetToken },
-    });
-
-
-    worker.on("message", (message) => {
-      if (!message.success) {
-        console.error("Worker failed to send email:", message.error);
-      }
-    });
-
-    worker.on("error", (error) => {
-      console.error("Worker thread error:", error);
-    });
-
-    worker.on("exit", (code) => {
-      if (code !== 0) {
-        console.error(`Worker stopped with exit code ${code}`);
-      }
+    axios.post("https://task-clerk-backend.onrender.com/reset-link", {
+      resetToken,
+      email,
     });
 
     return NextResponse.json({
