@@ -45,7 +45,7 @@ export async function POST(req) {
     const response = NextResponse.json(
       {
         message: "Sign in successful",
-        user: { email: user.email, username: user.username },
+        user: { email: user.email, username: user.username ,id: user._id },
         jwt:token
       },
       { status: 200 }
@@ -55,7 +55,7 @@ export async function POST(req) {
     response.cookies.set("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      maxAge: 3600,
+      maxAge: 36000,
       path: "/",
     });
 

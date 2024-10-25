@@ -5,23 +5,30 @@ import Link from "next/link";
 import axios from "axios";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-
+import { useDispatch } from "react-redux";
+import { setUserData } from "../../redux/features/UserSlice";
+import Cookies from "js-cookie";
 const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(""); // State to track error message
   const router = useRouter();
-
+  const dispatch = useDispatch();
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       setIsLoading(true);
-      setError(""); 
+      setError("");
 
       const response = await axios.post("/api/signin", { email, password });
       if (response.status === 200) {
-        localStorage.setItem("jwt", response.data.jwt);
+        Cookies.set("jwt", response.data.token, {
+          secure: true,
+          sameSite: "Strict",
+          expires: 1,
+        });
+        dispatch(setUserData(response.data.user));
         router.push("/posts");
       } else {
         setError("Invalid email or password."); // Set error if response is not 200

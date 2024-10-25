@@ -1,22 +1,19 @@
-import dbConnect from "../../../lib/mongodb";
+import dbConnect from "../../../../lib/mongodb";
 import bcrypt from "bcryptjs";
-import User from "../../../models/User";
+import User from "../../../../models/User";
 import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
-import Email from "next-auth/providers/email";
 
-export async function GET(req) {
+export async function GET(req,{params}) {
   try {
     await dbConnect();
-    const token = req.cookies.get("token");
-    const decode = jwt.verify(token.value, process.env.JWT_SECRET);
-    const userId = decode.userId;
-    let user = await User.findById(userId);
+      const { id } = params;
+    let user = await User.findById(id);
     const userData = {
-      name : user.name,
-      email:user.email,
-      id: user._id
-    }
+      name: user.name,
+      email: user.email,
+      id: user._id,
+    };
     if (!user) {
       return NextResponse.json({ message: "user not found" });
     }

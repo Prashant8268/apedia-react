@@ -37,7 +37,7 @@ const PostForm = () => {
       }
 
       // Retrieve JWT token from local storage
-      const token = localStorage.getItem("jwt");
+      const token = getCookie("jwt");
 
       // Send POST request to the API
       const response = await axios.post("/api/newPost", formData, {

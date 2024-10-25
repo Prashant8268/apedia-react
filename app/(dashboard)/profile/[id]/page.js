@@ -1,37 +1,53 @@
 "use client";
 import { useEffect, useState } from "react";
-import Posts from "../posts/page";
+import Posts from "../../posts/page";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { useSelector } from "react-redux"; // Import useSelector to access Redux state
+import Cookies from "js-cookie";
 
-// Mock data fetching function for initial data
-const fetchProfileData = async () => {
-  const response = await axios.get("/api/get-user");
+const fetchProfileData = async (userId) => {
+  const response = await axios.get(`/api/get-user-any/${userId}`);
   return response.data;
 };
 
-const Profile = () => {
+const Profile = ({ params }) => {
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [editable, setEditable] = useState(false);
   const router = useRouter();
+  const { id } = params;
+
+  // Get the logged-in user data from Redux
+  const loggedInUserId = useSelector((state) => state.user.userData?.id);
 
   useEffect(() => {
+    const userId = id; // Assuming your URL is like /profile/[id]
+
     const getData = async () => {
       try {
-        const data = await fetchProfileData();
-        console.log(data,'data')
+        const data = await fetchProfileData(userId);
         setProfileData(data);
+
+        // Check if the fetched user ID matches the logged-in user ID
+        if (data.id === loggedInUserId) {
+          setEditable(true); // Allow editing if IDs match
+        }
       } catch (error) {
         console.error("Error fetching profile data:", error);
       } finally {
         setLoading(false);
       }
     };
-    getData();
-  }, []);
+
+    if (userId) {
+      getData();
+    }
+  }, [id, loggedInUserId]); // Add loggedInUserId to the dependency array
 
   const handleLogout = async () => {
     await axios.get("/api/signout");
+    Cookies.remove("jwt");
     router.push("/signIn");
   };
 
@@ -95,6 +111,7 @@ const Profile = () => {
                     name: e.target.value,
                   }))
                 }
+                disabled={!editable} // Disable if not editable
               />
               <input
                 type="email"
@@ -109,18 +126,26 @@ const Profile = () => {
                     email: e.target.value,
                   }))
                 }
+                disabled={!editable} // Disable if not editable
               />
-              <input
-                type="file"
-                name="avatar"
-                placeholder="Profile Picture"
-                className="w-full p-2 mb-2 border border-gray-300 rounded"
-              />
-              <input
-                type="submit"
-                value="Update"
-                className="btn-primary mt-4 bg-blue-500 text-white px-4 py-2 rounded"
-              />
+              {editable && (
+                <>
+                  {" "}
+                  // Show file input only if editable
+                  <input
+                    type="file"
+                    name="avatar"
+                    placeholder="Profile Picture"
+                    className="w-full p-2 mb-2 border border-gray-300 rounded"
+                  />
+                  <input
+                    type="submit"
+                    value="Update"
+                    className="btn-primary mt-4 bg-blue-500 text-white px-4 py-2 rounded"
+                    disabled={!editable} // Disable submit button if not editable
+                  />
+                </>
+              )}
             </form>
           </div>
         </div>

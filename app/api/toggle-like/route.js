@@ -60,7 +60,6 @@ export async function POST(req, res) {
       likeable.likes.push(newLike._id);
       await likeable.save();
     }
-
     return NextResponse.json({
       message: "Request successful",
       data: {
