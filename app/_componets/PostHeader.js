@@ -1,7 +1,6 @@
-// PostHeader.js
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisV } from "@fortawesome/free-solid-svg-icons";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 
 const PostHeader = ({ post, handleProfileClick, setPosts }) => {
@@ -21,6 +20,28 @@ const PostHeader = ({ post, handleProfileClick, setPosts }) => {
       console.error("Error deleting post:", error);
     }
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Check if the click is outside the menu and button
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target) &&
+        postMenuButtonRef.current &&
+        !postMenuButtonRef.current.contains(event.target)
+      ) {
+        setOpenPostMenu(false);
+      }
+    };
+
+    // Add event listener to the document
+    document.addEventListener("mousedown", handleClickOutside);
+
+    // Clean up the event listener when component unmounts
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <div className="flex justify-between items-center mb-4">

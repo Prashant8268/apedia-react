@@ -1,8 +1,10 @@
-// PostContent.js
 const PostContent = ({ post }) => {
   return (
     <>
+      {/* Render post content */}
       <p className="text-gray-800 mb-2">{post.content}</p>
+
+      {/* Render post image if it exists */}
       {post.photoUrl && (
         <img
           src={post.photoUrl}

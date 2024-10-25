@@ -130,8 +130,6 @@ const Profile = ({ params }) => {
               />
               {editable && (
                 <>
-                  {" "}
-                  // Show file input only if editable
                   <input
                     type="file"
                     name="avatar"
