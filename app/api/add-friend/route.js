@@ -8,57 +8,113 @@ import User from "../../../models/User";
 export async function POST(req) {
   await dbConnect();
 
-  if (req.method === "POST") {
-    try {
-      const { userId, toUserId } = await req.json(); // Assuming `userId` (current user) and `toUserId` (friend) are passed in the request body
+  try {
+    const { userId, profileId, action } = await req.json(); // Include action in the request body
 
-      const toUser = await User.findById(toUserId);
-      if (!toUser) {
-        return NextResponse.json({ error: "User not found" }, { status: 404 });
-      }
+    const toUser = await User.findById(profileId);
+    if (!toUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
 
-      const fromUser = await User.findById(userId);
-      if (!fromUser) {
+    const fromUser = await User.findById(userId);
+    if (!fromUser) {
+      return NextResponse.json(
+        { error: "Requesting user not found" },
+        { status: 404 }
+      );
+    }
+
+    if (action === "add") {
+      // Check if a friendship already exists
+      const existingFriendship = await Friendship.findOne({
+        $or: [
+          { from_user: userId, to_user: profileId },
+          { from_user: profileId, to_user: userId },
+        ],
+      });
+
+      if (existingFriendship) {
         return NextResponse.json(
-          { error: "Requesting user not found" },
-          { status: 404 }
+          { error: "Friend request already exists" },
+          { status: 400 }
         );
       }
 
       // Create a new friendship request
-      const friendship = await Friendship.create({
-        to_user: toUserId,
+      await Friendship.create({
+        to_user: profileId,
         from_user: userId,
         status: "pending",
       });
-
-      // Ensure friends arrays are initialized
-      toUser.friends = toUser.friends || []; // Initialize if undefined
-      fromUser.friends = fromUser.friends || []; // Initialize if undefined
-
-      // Add friendship ID to both users' friends arrays
-      toUser.friends.push(friendship._id);
-      fromUser.friends.push(friendship._id);
-
-      // Save both users
-      await toUser.save();
-      await fromUser.save();
 
       return NextResponse.json(
         { message: "Friend request sent successfully" },
         { status: 200 }
       );
-    } catch (err) {
-      console.error("Error adding friend:", err);
+    } else if (action === "cancel") {
+      // Cancel the friend request
+      const canceledRequest = await Friendship.findOneAndDelete({
+        from_user: userId,
+        to_user: profileId,
+        status: "pending",
+      });
+
+      if (!canceledRequest) {
+        return NextResponse.json(
+          { error: "No pending friend request to cancel" },
+          { status: 400 }
+        );
+      }
+
       return NextResponse.json(
-        { error: "Internal Server Error" },
-        { status: 500 }
+        { message: "Friend request canceled" },
+        { status: 200 }
       );
+    } else if (action === "accept") {
+      // Accept the friend request
+      const friendship = await Friendship.findOneAndUpdate(
+        { from_user: profileId, to_user: userId, status: "pending" },
+        { status: "accepted" },
+        { new: true }
+      );
+
+      if (!friendship) {
+        return NextResponse.json(
+          { error: "No pending request to accept" },
+          { status: 400 }
+        );
+      }
+
+      return NextResponse.json(
+        { message: "Friend request accepted" },
+        { status: 200 }
+      );
+    } else if (action === "remove") {
+      // Remove a friend
+      const removedFriendship = await Friendship.findOneAndDelete({
+        $or: [
+          { from_user: userId, to_user: profileId },
+          { from_user: profileId, to_user: userId },
+        ],
+        status: "accepted",
+      });
+
+      if (!removedFriendship) {
+        return NextResponse.json(
+          { error: "No friendship found to remove" },
+          { status: 400 }
+        );
+      }
+
+      return NextResponse.json({ message: "Friend removed" }, { status: 200 });
     }
-  } else {
+
+    return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+  } catch (err) {
+    console.error("Error handling friend request:", err);
     return NextResponse.json(
-      { error: `Method ${req.method} Not Allowed` },
-      { status: 405 }
+      { error: "Internal Server Error" },
+      { status: 500 }
     );
   }
 }
