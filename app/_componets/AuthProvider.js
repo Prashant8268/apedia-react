@@ -11,13 +11,9 @@ const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = Cookies.get("jwt");
-      if (token) {
+      if (true) {
         try {
-          const response = await axios.get("/api/get-user", {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-
+          const response = await axios.get("/api/get-user");
           if (response.status === 200) {
             dispatch(setUserData(response.data)); 
           }

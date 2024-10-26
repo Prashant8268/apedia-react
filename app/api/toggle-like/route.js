@@ -14,8 +14,10 @@ export async function POST(req, res) {
   }
 
   try {
-    const { id, type, token } = await req.json();
-    const user = jwt.verify(token, process.env.JWT_SECRET);
+    const { id, type } = await req.json();
+    const token = req.cookies.get("token");
+    const user = jwt.verify(token.value, process.env.JWT_SECRET);
+
 
     let likeable;
     let deleted = false;
@@ -33,8 +35,8 @@ export async function POST(req, res) {
         .populate({
           path: "likes",
           populate: {
-            path: "user", 
-            select: "name avatar", 
+            path: "user",
+            select: "name avatar",
           },
         });
     } else {

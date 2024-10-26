@@ -30,6 +30,18 @@ const userSchema = new mongoose.Schema(
         ref: "Post",
       },
     ],
+    friends: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Friendship",
+      },
+    ],
+    friendsName: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
     resetToken: {
       type: String,
       default: null,

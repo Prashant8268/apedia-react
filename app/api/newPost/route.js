@@ -14,16 +14,14 @@ export async function POST(req) {
   await dbConnect();
 
   // Validate Authorization header
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  }
-
-  const token = authHeader.split(" ")[1];
+  const token = req.cookies.get("token");
+  const decode = jwt.verify(token.value, process.env.JWT_SECRET);
+  const userId = decode.userId;
   let user;
-
+  
   try {
-    user = jwt.verify(token, process.env.JWT_SECRET);
+
+    user = jwt.verify(token.value, process.env.JWT_SECRET);
   } catch (error) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
@@ -79,7 +77,7 @@ async function uploadToS3(photo) {
   const buffer = Buffer.from(await photo.arrayBuffer());
 
   const params = {
-    Bucket: process.env.AWS_S3_BUCKET_NAME, 
+    Bucket: process.env.AWS_S3_BUCKET_NAME,
     Key: `uploads/posts/${photoName}`,
     Body: buffer,
     ContentType: photo.type,
@@ -94,5 +92,3 @@ async function uploadToS3(photo) {
     throw new Error("Failed to upload to S3");
   }
 }
-
-

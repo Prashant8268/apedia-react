@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react"; // Import useRef to reference the file input
 import axios from "axios";
+import { useSelector } from "react-redux";
 
 const PostForm = () => {
   // State hooks for managing post content, file selection, loading state, and messages
@@ -10,6 +11,8 @@ const PostForm = () => {
 
   // Create a ref to access the file input directly
   const fileInputRef = useRef(null);
+  const user = useSelector((state)=>state.user);
+
 
   // Handle text change in the textarea
   const handleTextChange = (e) => {
@@ -37,15 +40,9 @@ const PostForm = () => {
       }
 
       // Retrieve JWT token from local storage
-      const token = getCookie("jwt");
 
       // Send POST request to the API
-      const response = await axios.post("/api/newPost", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.post("/api/newPost", formData);
       setMessage("Post submitted successfully!");
       setNewPostContent("");
       setSelectedFile(null);

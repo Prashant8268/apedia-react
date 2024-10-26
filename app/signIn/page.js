@@ -23,11 +23,6 @@ const SignIn = () => {
 
       const response = await axios.post("/api/signin", { email, password });
       if (response.status === 200) {
-        Cookies.set("jwt", response.data.token, {
-          secure: true,
-          sameSite: "Strict",
-          expires: 1,
-        });
         dispatch(setUserData(response.data.user));
         router.push("/posts");
       } else {

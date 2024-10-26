@@ -4,16 +4,17 @@ import User from "../../../../models/User";
 import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
 
-export async function GET(req,{params}) {
+export async function GET(req, { params }) {
   try {
     await dbConnect();
-      const { id } = params;
+    const { id } = params;
     let user = await User.findById(id);
     const userData = {
       name: user.name,
       email: user.email,
       id: user._id,
     };
+
     if (!user) {
       return NextResponse.json({ message: "user not found" });
     }

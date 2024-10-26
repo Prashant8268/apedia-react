@@ -18,6 +18,7 @@ export default function RootLayout({ children }) {
   const pathname = usePathname();
   const userData = useSelector((state) => state.user);
 
+
   useEffect(() => {
     const path = pathname.split("/")[1];
     setActiveTab(path || "posts");

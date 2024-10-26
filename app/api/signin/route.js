@@ -45,8 +45,13 @@ export async function POST(req) {
     const response = NextResponse.json(
       {
         message: "Sign in successful",
-        user: { email: user.email, username: user.username ,id: user._id },
-        jwt:token
+        user: {
+          email: user.email,
+          username: user.username,
+          id: user._id,
+          jwt: token,
+        },
+        jwt: token,
       },
       { status: 200 }
     );
