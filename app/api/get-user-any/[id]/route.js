@@ -13,6 +13,7 @@ export async function GET(req, { params }) {
       name: user.name,
       email: user.email,
       id: user._id,
+      avatarUrl: user.avatarUrl
     };
 
     if (!user) {

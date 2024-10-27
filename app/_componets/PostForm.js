@@ -1,54 +1,42 @@
-import React, { useState, useRef } from "react"; // Import useRef to reference the file input
+import React, { useState, useRef } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
 
 const PostForm = () => {
-  // State hooks for managing post content, file selection, loading state, and messages
   const [newPostContent, setNewPostContent] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  // Create a ref to access the file input directly
   const fileInputRef = useRef(null);
-  const user = useSelector((state)=>state.user);
+  const user = useSelector((state) => state.user);
 
-
-  // Handle text change in the textarea
   const handleTextChange = (e) => {
     setNewPostContent(e.target.value);
   };
 
-  // Handle file selection
   const handleFileChange = (e) => {
     if (e.target.files.length > 0) {
       setSelectedFile(e.target.files[0]);
     }
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); // Set loading state to true
+    setLoading(true);
 
     try {
-      // Create FormData object to hold form values
       const formData = new FormData();
       formData.append("content", newPostContent);
       if (selectedFile) {
         formData.append("photo", selectedFile);
       }
 
-      // Retrieve JWT token from local storage
-
-      // Send POST request to the API
       const response = await axios.post("/api/newPost", formData);
       setMessage("Post submitted successfully!");
       setNewPostContent("");
       setSelectedFile(null);
-
-      // Reset the file input
-      fileInputRef.current.value = null; // Reset the file input field
+      fileInputRef.current.value = null;
     } catch (error) {
       console.error("Error submitting post:", error);
       setMessage("Failed to submit post.");
@@ -58,16 +46,19 @@ const PostForm = () => {
   };
 
   return (
-    <div>
+    <div className="flex justify-center">
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-4 rounded-lg shadow-md mb-6 max-w-md"
+        className="bg-white p-4 rounded-lg shadow-md mb-6 max-w-md w-full border border-gray-300"
       >
+        <h2 className="text-xl font-semibold text-center mb-3 text-blue-600">
+          Create a New Post
+        </h2>
         <textarea
           value={newPostContent}
           onChange={handleTextChange}
           placeholder="What's on your mind?"
-          className="w-full p-2 border rounded-lg mb-2"
+          className="text-blue  w-full p-3 border border-gray-300 rounded-lg mb-3 focus:outline-none focus:ring focus:ring-blue-300 transition duration-200"
           rows="4"
           required
         />
@@ -75,19 +66,26 @@ const PostForm = () => {
           type="file"
           accept="image/*"
           onChange={handleFileChange}
-          className="w-full mb-2"
-          ref={fileInputRef} // Attach the ref to the file input
+          className="w-full mb-3 border border-gray-300 rounded-lg p-2 text-gray-700 cursor-pointer hover:bg-blue-50 transition duration-200"
+          ref={fileInputRef}
         />
         <button
           type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg"
-          disabled={loading} // Disable button while loading
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200 w-full"
+          disabled={loading}
         >
           {loading ? "Posting..." : "Post"}
         </button>
+        {message && (
+          <p
+            className={`text-center mt-3 ${
+              message.includes("Failed") ? "text-red-500" : "text-green-500"
+            }`}
+          >
+            {message}
+          </p>
+        )}
       </form>
-      {message && <p className="text-center text-red-500">{message}</p>}{" "}
-      {/* Display message */}
     </div>
   );
 };

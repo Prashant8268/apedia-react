@@ -1,22 +1,15 @@
 // src/app/components/Posts.js
 "use client";
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import PostForm from "../../_componets/PostForm";
 import PostItem from "../../_componets/PostItem";
-import axios from "axios";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { useGetPostsQuery } from "@/redux/features/postSlice";
 
 const Posts = () => {
   const router = useRouter();
-
   const { data, error, isLoading } = useGetPostsQuery();
   const posts = data ? data.posts : [];
-  console.log(posts,' posts');
-  function setPosts(){
-
-  }
 
   // Function to handle post deletion
   const handlePostDeleted = (postId) => {
@@ -29,15 +22,19 @@ const Posts = () => {
   };
 
   return (
-    <div className="bg-gray-100 p-6 rounded-lg">
-      <h1 className="text-3xl font-bold mb-6">Posts</h1>
+    <div className="bg-gradient-to-br from-blue-50 to-blue-100 min-h-screen p-8 rounded-lg shadow-md">
       <PostForm />
-      <div className="w-full md:w-1/2 lg:w-1/2 mx-auto">
-        {" "}
-        {/* This div controls the width */}
+      <h2 className="text-2xl font-semibold text-center text-blue-600 mt-6 mb-4">
+        Latest Posts
+      </h2>
+      <div className="w-full md:w-3/4 lg:w-2/3 mx-auto space-y-4">
+        {/* Loading Spinner */}
         {isLoading ? (
-          <div className="flex justify-center items-center h-100">
-            <AiOutlineLoading3Quarters className="animate-spin" />
+          <div className="flex justify-center items-center h-40">
+            <AiOutlineLoading3Quarters
+              className="animate-spin text-blue-600"
+              size={40}
+            />
           </div>
         ) : (
           posts.map((post) => (
@@ -46,7 +43,6 @@ const Posts = () => {
               post={post}
               onPostDeleted={handlePostDeleted}
               handleProfileClick={handleProfileClick}
-              setPosts={setPosts}
             />
           ))
         )}

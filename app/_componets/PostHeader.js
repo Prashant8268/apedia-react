@@ -47,7 +47,11 @@ const PostHeader = ({ post, handleProfileClick, setPosts }) => {
     <div className="flex justify-between items-center mb-4">
       <div className="flex items-center">
         <img
-          src={``}
+          src={`${
+            post.user.avatarUrl
+              ? post.user.avatarUrl
+              : "https://cdn-icons-png.flaticon.com/512/1077/1077114.png"
+          }`}
           alt={post.user.name}
           className="w-10 h-10 rounded-full cursor-pointer border border-gray-300"
           onClick={() => handleProfileClick(post.user._id)}

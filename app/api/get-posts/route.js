@@ -14,7 +14,7 @@ export async function GET(req) {
     if (tokenResponse) return tokenResponse;
     const userId = req.user.userId;
     const posts = await Post.find()
-      .populate("user", "name avatar")
+      .populate("user", "name avatarUrl")
       .populate({
         path: "comments",
         populate: {

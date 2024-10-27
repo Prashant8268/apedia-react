@@ -1,11 +1,14 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import Cookies from "js-cookie";
 import FriendsList from "@/app/_componets/Friends";
+import { setUserData } from "@/redux/features/UserSlice";
+import { FaSpinner } from "react-icons/fa";
 
+// Memoize API fetch functions
 const fetchProfileData = async (userId) => {
   const response = await axios.get(`/api/get-user-any/${userId}`);
   return response.data;
@@ -19,6 +22,11 @@ const fetchFriendsData = async (userId) => {
 const Profile = ({ params }) => {
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [apiLoading, setApiLoading] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [file, setFile] = useState(null);
   const [friendshipStatus, setFriendshipStatus] = useState(null);
   const [friends, setFriends] = useState([]);
   const [friendRequests, setFriendRequests] = useState([]);
@@ -26,19 +34,21 @@ const Profile = ({ params }) => {
   const { id } = params;
   const userData = useSelector((state) => state.user.userData);
   const loggedInUserId = userData?.id;
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchStatus = async () => {
       try {
         const profileRes = await fetchProfileData(id);
         setProfileData(profileRes);
+        setName(profileRes.name);
+        setEmail(profileRes.email);
 
         const statusRes = await axios.get(`/api/get-friendship-status`, {
           params: { userId: loggedInUserId, profileId: id },
         });
         setFriendshipStatus(statusRes.data);
 
-        // Fetch friends and friend requests
         const friendsRes = await fetchFriendsData(loggedInUserId);
         setFriends(friendsRes.acceptedFriends);
         setFriendRequests(friendsRes.friendRequests);
@@ -54,45 +64,86 @@ const Profile = ({ params }) => {
     }
   }, [id, loggedInUserId]);
 
-  const handleLogout = async () => {
+  // Memoize profileData to avoid re-computing on every render
+  const memoizedProfileData = useMemo(() => profileData, [profileData]);
+
+  // Logout handler with useCallback
+  const handleLogout = useCallback(async () => {
+    setApiLoading(true);
     await axios.get("/api/signout");
     Cookies.remove("jwt");
     router.push("/signIn");
-  };
+    setApiLoading(false);
+  }, [router]);
 
-  const handleFriendRequest = async (action) => {
+  // Memoize handleFriendRequest to avoid re-creating on every render
+  const handleFriendRequest = useCallback(
+    async (action) => {
+      try {
+        const response = await axios.post("/api/add-friend", {
+          userId: loggedInUserId,
+          profileId: id,
+          action,
+        });
+
+        if (response.status === 200) {
+          setFriendshipStatus(
+            action === "add"
+              ? { status: "request_sent" }
+              : action === "cancel"
+              ? { status: "not_friends" }
+              : action === "accept"
+              ? { status: "friends" }
+              : { status: "not_friends" }
+          );
+        }
+      } catch (error) {
+        console.error("Error handling friend request:", error);
+      }
+    },
+    [loggedInUserId, id]
+  );
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("email", email);
+    formData.append("userId", id);
+    if (file) {
+      formData.append("avatar", file);
+    }
+
     try {
-      const response = await axios.post("/api/add-friend", {
-        userId: loggedInUserId,
-        profileId: id,
-        action,
+      setApiLoading(true);
+      const response = await axios.post(`/api/update-profile`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
 
       if (response.status === 200) {
-        setFriendshipStatus(
-          action === "add"
-            ? { status: "request_sent" }
-            : action === "cancel"
-            ? { status: "not_friends" }
-            : action === "accept"
-            ? { status: "friends" }
-            : { status: "not_friends" }
-        );
+        setProfileData(response.data.user);
+        dispatch(setUserData(response.data.user));
+        setEditing(false);
+        setApiLoading(false);
       }
     } catch (error) {
-      console.error("Error handling friend request:", error);
+      console.error("Error updating profile:", error);
     }
   };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen text-gray-700">
-        <div className="loader"></div>
+        <div className="loader">
+          <FaSpinner className="animate-spin text-4xl text-blue-500" />
+        </div>
       </div>
     );
   }
 
-  if (!profileData) {
+  if (!memoizedProfileData) {
     return (
       <div className="flex justify-center items-center h-screen text-gray-700">
         Error loading profile data.
@@ -100,7 +151,7 @@ const Profile = ({ params }) => {
     );
   }
 
-  const { name, email, avatar } = profileData;
+  const { avatarUrl } = memoizedProfileData;
 
   return (
     <div className="bg-gray-100 min-h-screen py-8">
@@ -108,74 +159,78 @@ const Profile = ({ params }) => {
         <div className="mx-auto bg-white text-black p-6 rounded-lg shadow-lg w-full max-w-lg flex flex-col items-center">
           <div className="w-32 h-32 rounded-full mb-4 border-4 border-blue-500 flex justify-center items-center">
             <img
-              src={avatar || "/default-avatar.png"}
+              src={
+                avatarUrl ||
+                "https://cdn-icons-png.flaticon.com/512/1077/1077114.png"
+              }
               alt={name}
               className="w-28 h-28 rounded-full object-cover"
             />
           </div>
-          <h1 className="text-4xl font-bold text-blue-600 mb-2">{name}</h1>
-          <p className="text-lg text-gray-800">{email}</p>
-
-          <div className="w-full mt-6 space-y-2">
-            <h3 className="text-2xl mb-4 text-gray-800">Actions</h3>
-            <button
-              onClick={handleLogout}
-              className="w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg shadow-md transition"
-            >
-              Logout
-            </button>
-
-            {friendshipStatus?.status === "not_friends" &&
-              loggedInUserId !== id && (
+          {!editing ? (
+            <>
+              <h1 className="text-4xl font-bold text-blue-600 mb-2">{name}</h1>
+              <p className="text-lg text-gray-800">{email}</p>
+              {loggedInUserId === id && (
                 <button
-                  onClick={() => handleFriendRequest("add")}
-                  className="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow-md transition"
+                  onClick={() => setEditing(true)}
+                  className="mt-4 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow-md transition"
                 >
-                  Add Friend
+                  Edit Profile
                 </button>
               )}
-            {friendshipStatus?.status === "friends" && (
+            </>
+          ) : (
+            <form onSubmit={handleUpdateProfile} className="w-full mt-6">
+              <div className="mb-4">
+                <label className="block text-gray-700">Name</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700">Email</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700">Avatar</label>
+                <input
+                  type="file"
+                  onChange={(e) => setFile(e.target.files[0])}
+                  className="w-full px-3 py-2 border rounded-lg"
+                />
+              </div>
               <button
-                onClick={() => handleFriendRequest("remove")}
-                className="w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg shadow-md transition"
+                type="submit"
+                className="w-full px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg shadow-md transition"
               >
-                Remove Friend
+                {apiLoading ? "Updating..." : "Save Changes"}
               </button>
-            )}
-            {friendshipStatus?.status === "request_sent" && (
               <button
-                onClick={() => handleFriendRequest("cancel")}
-                className="w-full px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg shadow-md transition"
+                type="button"
+                onClick={() => setEditing(false)}
+                className="w-full mt-2 px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg shadow-md transition"
               >
-                Cancel Request
+                Cancel
               </button>
-            )}
-            {friendshipStatus?.status === "request_received" && (
-              <>
-                <button
-                  onClick={() => handleFriendRequest("accept")}
-                  className="w-full px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg shadow-md transition"
-                >
-                  Accept Request
-                </button>
-                <button
-                  onClick={() => handleFriendRequest("reject")}
-                  className="w-full px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-lg shadow-md transition"
-                >
-                  Reject Request
-                </button>
-              </>
-            )}
-          </div>
-        </div>
+            </form>
+          )}
 
-        {/* Render the Friends component */}
-        <FriendsList
-          friends={friends}
-          friendRequests={friendRequests}
-          onAcceptRequest={handleFriendRequest}
-          onRejectRequest={handleFriendRequest}
-        />
+          <button
+            onClick={handleLogout}
+            className="mt-6 w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg shadow-md transition"
+          >
+            {apiLoading?"Logging Out":"Logout"}
+          </button>
+        </div>
       </div>
     </div>
   );
