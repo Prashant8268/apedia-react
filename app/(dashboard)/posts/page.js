@@ -27,7 +27,7 @@ const Posts = () => {
       <h2 className="text-2xl font-semibold text-center text-blue-600 mt-6 mb-4">
         Latest Posts
       </h2>
-      <div className="w-full md:w-3/4 lg:w-2/3 mx-auto space-y-4">
+      <div className="w-full md:w-3/4 lg:w-1/3 mx-auto space-y-4">
         {/* Loading Spinner */}
         {isLoading ? (
           <div className="flex justify-center items-center h-40">

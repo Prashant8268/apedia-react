@@ -57,7 +57,7 @@ const PostHeader = ({ post, handleProfileClick, setPosts }) => {
           onClick={() => handleProfileClick(post.user._id)}
         />
         <p
-          className="text-lg font-semibold ml-4 cursor-pointer hover:text-blue-600"
+          className="text-lg font-semibold ml-4 cursor-pointer text-blue-600 hover:text-blue-800"
           onClick={() => handleProfileClick(post.user._id)}
         >
           {post.user.name}

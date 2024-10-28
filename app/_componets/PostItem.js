@@ -101,7 +101,7 @@ const PostItem = ({ post: initialPost, setPosts, handleProfileClick }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mb-6 relative transition-transform transform hover:scale-105">
+    <div className="bg-white rounded-lg shadow-md p-6 mb-6 relative ">
       <PostHeader post={post} handleProfileClick={handleProfileClick} />
       <PostContent post={post} />
       <PostActions
