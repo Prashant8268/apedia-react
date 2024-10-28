@@ -9,18 +9,18 @@ export async function GET(req) {
   try {
     await dbConnect();
     const token = req.cookies.get("token");
-    const decode = jwt.verify(token.value, process.env.JWT_SECRET);
-    const userId = decode.userId;
-    let user = await User.findById(userId).populate({
-      path: "friends",
-      populate: {
-        path: "from_user to_user", 
-        select: "name _id", 
-      },
-    });
+    let userId;
+    try {
+      const decode = jwt.verify(token.value, process.env.JWT_SECRET);
+      userId = decode.userId;
+    } catch (err) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+    let user = await User.findById(userId).populate('friends');
     const userData = {
       name: user.name,
       email: user.email,
+      avatarUrl: user.avatarUrl,
       id: user._id,
       friends: user.friends,
       friendsName: user.friendsName,

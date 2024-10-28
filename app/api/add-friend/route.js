@@ -4,13 +4,23 @@ import { NextResponse } from "next/server";
 import dbConnect from "../../../lib/mongodb";
 import Friendship from "../../../models/Friendship";
 import User from "../../../models/User";
+import jwt from "jsonwebtoken";
 
 export async function POST(req) {
   await dbConnect();
 
-  try {
-    const { userId, profileId, action } = await req.json(); // Include action in the request body
+  const token = req.cookies.get("token");
+  const { userId, profileId, action ,friendshipId} = await req.json();
 
+  try {
+    const decode = jwt.verify(token.value, process.env.JWT_SECRET);
+    if (userId !== decode.userId)
+      return NextResponse.json({ message: "Not Authorized" }, { status: 401 });
+  } catch (err) {
+    return NextResponse.json({ message: "Not Authorized" }, { status: 401 });
+  }
+
+  try {
     const toUser = await User.findById(profileId);
     if (!toUser) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -40,15 +50,26 @@ export async function POST(req) {
         );
       }
 
+      await User.updateMany(
+        { friends: { $exists: false } },
+        { $set: { friends: [] } }
+      );
+
       // Create a new friendship request
-      await Friendship.create({
+      const new_friendship = await Friendship.create({
         to_user: profileId,
         from_user: userId,
         status: "pending",
       });
+      if (!toUser.friends) toUser.friends = [];
+      if (!fromUser.friends) fromUser.friends = [];
+      toUser.friends.push(new_friendship);
+      await toUser.save();
+      fromUser.friends.push(new_friendship);
+      await fromUser.save();
 
       return NextResponse.json(
-        { message: "Friend request sent successfully" },
+        { message: "Friend request sent successfully", new_friendship },
         { status: 200 }
       );
     } else if (action === "cancel") {
@@ -58,7 +79,13 @@ export async function POST(req) {
         to_user: profileId,
         status: "pending",
       });
-
+      await User.findByIdAndUpdate(userId, {
+        $pull: { friends: friendshipId },
+      });
+      await User.findByIdAndUpdate(profileId, {
+        $pull: { friends: friendshipId },
+      });
+      console.log(friendshipId,canceledRequest,'at api');
       if (!canceledRequest) {
         return NextResponse.json(
           { error: "No pending friend request to cancel" },
@@ -85,6 +112,15 @@ export async function POST(req) {
         );
       }
 
+      // Add both users to each other's friends array
+      await User.findByIdAndUpdate(userId, {
+        $addToSet: { friends: profileId },
+      });
+
+      await User.findByIdAndUpdate(profileId, {
+        $addToSet: { friends: userId },
+      });
+
       return NextResponse.json(
         { message: "Friend request accepted" },
         { status: 200 }
@@ -105,6 +141,15 @@ export async function POST(req) {
           { status: 400 }
         );
       }
+
+      // Remove both users from each other's friends array
+      await User.findByIdAndUpdate(userId, {
+        $pull: { friends: profileId },
+      });
+
+      await User.findByIdAndUpdate(profileId, {
+        $pull: { friends: userId },
+      });
 
       return NextResponse.json({ message: "Friend removed" }, { status: 200 });
     }

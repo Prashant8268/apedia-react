@@ -28,18 +28,21 @@ const userSchema = new mongoose.Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Post",
+        default: [],
       },
     ],
     friends: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Friendship",
+        default: [],
       },
     ],
     friendsName: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
+        default: [],
       },
     ],
     resetToken: {

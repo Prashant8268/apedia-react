@@ -14,6 +14,7 @@ const AuthProvider = ({ children }) => {
       if (true) {
         try {
           const response = await axios.get("/api/get-user");
+          console.log(response, 'values at auth')
           if (response.status === 200) {
             dispatch(setUserData(response.data)); 
           }

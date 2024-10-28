@@ -1,14 +1,16 @@
-const ProfileEditForm = ({
+import React from "react";
+
+const EditProfileForm = ({
   name,
   setName,
   email,
   setEmail,
-  file,
   setFile,
-  onSubmit,
-  isLoading,
+  handleUpdateProfile,
+  apiLoading,
+  setEditing,
 }) => (
-  <form onSubmit={onSubmit} className="w-full mt-6">
+  <form onSubmit={handleUpdateProfile} className="w-full mt-6">
     <div className="mb-4">
       <label className="block text-gray-700">Name</label>
       <input
@@ -39,9 +41,16 @@ const ProfileEditForm = ({
       type="submit"
       className="w-full px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg shadow-md transition"
     >
-      {isLoading ? "Updating..." : "Save Changes"}
+      {apiLoading ? "Updating..." : "Save Changes"}
+    </button>
+    <button
+      type="button"
+      onClick={() => setEditing(false)}
+      className="w-full mt-2 px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg shadow-md transition"
+    >
+      Cancel
     </button>
   </form>
 );
 
-export default ProfileEditForm;
+export default EditProfileForm;
