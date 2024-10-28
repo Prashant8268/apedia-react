@@ -49,7 +49,7 @@ const Friends = () => {
   const handleReject = async (requestId, profileId) => {
     try {
       const res = await axios.post("/api/add-friend", {
-        friendshipId:requestId,
+        friendshipId: requestId,
         action: "cancel",
         userId: userData.id,
         profileId,
@@ -98,18 +98,20 @@ const Friends = () => {
                         </div>
                       </Link>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center z-10 space-x-10">
                       <button
                         onClick={() =>
                           handleAccept(request._id, request.from_user._id)
                         }
-                        className="text-green-500 hover:text-green-700"
+                        className="text-green-500 hover:text-green-700 text-4xl"
                       >
                         <FontAwesomeIcon icon={faCheck} />
                       </button>
                       <button
-                        onClick={() => handleReject(request._id,request.from_user._id)}
-                        className="text-red-500 hover:text-red-700"
+                        onClick={() =>
+                          handleReject(request._id, request.from_user._id)
+                        }
+                        className="text-red-500 hover:text-red-700 text-4xl"
                       >
                         <FontAwesomeIcon icon={faTimes} />
                       </button>

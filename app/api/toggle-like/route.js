@@ -24,19 +24,19 @@ export async function POST(req, res) {
     if (type == "Post") {
       likeable = await Post.findById(id)
         .populate("likes")
-        .populate("user", "name avatar")
+        .populate("user", "name avatarUrl")
         .populate({
           path: "comments",
           populate: {
             path: "user",
-            select: "name avatar",
+            select: "name avatarUrl",
           },
         })
         .populate({
           path: "likes",
           populate: {
             path: "user",
-            select: "name avatar",
+            select: "name avatarUrl",
           },
         });
     } else {
