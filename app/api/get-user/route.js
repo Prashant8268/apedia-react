@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
 import Email from "next-auth/providers/email";
 import Friendship from "@/models/Friendship";
+import { Cuprum } from "next/font/google";
 export async function GET(req) {
   try {
     await dbConnect();
@@ -16,7 +17,17 @@ export async function GET(req) {
     } catch (err) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
-    let user = await User.findById(userId).populate('friends');
+    let user = await User.findById(userId)
+      .populate({
+        path: "friends",
+        populate: {
+          path: "from_user",
+          select: "name avatarUrl", 
+        },
+      })
+      .populate("friendsName", "name avatarUrl");
+    const friendRequest =
+      user?.friends?.filter((friend) => friend.to_user == userId) || [];
     const userData = {
       name: user.name,
       email: user.email,
@@ -24,6 +35,7 @@ export async function GET(req) {
       id: user._id,
       friends: user.friends,
       friendsName: user.friendsName,
+      friendRequest,
     };
     if (!user) {
       return NextResponse.json({ message: "user not found" });

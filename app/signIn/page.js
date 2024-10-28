@@ -20,7 +20,7 @@ const SignIn = () => {
     try {
       setIsLoading(true);
       setError("");
-
+      console.log('at sign ipage')
       const response = await axios.post("/api/signin", { email, password });
       if (response.status === 200) {
         dispatch(setUserData(response.data.user));

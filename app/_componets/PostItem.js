@@ -8,6 +8,7 @@ import {
   faEllipsisV,
 } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
+import { useSelector } from "react-redux";
 import PostActions from "./PostActions"; // Import PostActions component
 import { useToggleLikeMutation } from "@/redux/features/postSlice";
 import PostContent from "./PostContent";
@@ -20,9 +21,8 @@ const PostItem = ({ post: initialPost, setPosts, handleProfileClick }) => {
   const [openPostMenu, setOpenPostMenu] = useState(false);
   const menuRef = useRef(null);
   const postMenuButtonRef = useRef(null);
-  const jwt = localStorage.getItem("jwt");
-  const decodedToken = jwt ? JSON.parse(atob(jwt.split(".")[1])) : null;
-  const userId = decodedToken.userId;
+  const userData = useSelector((state) => state.user.userData);
+  const userId = userData?.id;
 
   const [isPostLiked, setIsPostLiked] = useState(
     post.likes.some((like) => like.user?._id === userId)
@@ -61,11 +61,8 @@ const PostItem = ({ post: initialPost, setPosts, handleProfileClick }) => {
   const [toggleLike] = useToggleLikeMutation();
 
   const handleLikePost = async () => {
-    const jwt = localStorage.getItem("jwt");
-    if (!jwt) return;
-
     try {
-      const response = await toggleLike({ id: post._id, token: jwt }).unwrap();
+      const response = await toggleLike({ id: post._id}).unwrap();
       setPost(response.data.likeable);
       setIsPostLiked((prev) => !prev);
     } catch (error) {
@@ -90,7 +87,6 @@ const PostItem = ({ post: initialPost, setPosts, handleProfileClick }) => {
       const response = await axios.post("/api/add-comment", {
         postId: post._id,
         text: newComment,
-        token: jwt,
       });
       const createdComment = response.data.comment;
       setComments((prevComments) => [...prevComments, createdComment]);

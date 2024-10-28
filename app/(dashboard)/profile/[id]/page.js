@@ -1,20 +1,30 @@
+// Import necessary dependencies
 "use client";
 import { useState, useCallback, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import Cookies from "js-cookie";
-import { removeFriend, setUserData , addFriend} from "@/redux/features/UserSlice";
+import {
+  removeFriendship,
+  removeFriend,
+  setUserData,
+  updateUserData,
+  addFriend,
+  addFriendship,
+} from "@/redux/features/UserSlice";
 import { FaSpinner } from "react-icons/fa";
 
 import UserAvatar from "@/app/_componets/UserAvatar";
 import EditProfileForm from "@/app/_componets/ProfileEditForm";
 import { useProfileData } from "@/app/_hooks/useProfileData";
+import ConfirmationModal from "@/app/_componets/ConfirModal";
 
 const Profile = ({ params }) => {
   const [editing, setEditing] = useState(false);
   const [apiLoading, setApiLoading] = useState(false);
   const [file, setFile] = useState(null);
+  const [showModal, setShowModal] = useState(false); // State for modal visibility
 
   const router = useRouter();
   const { id } = params;
@@ -38,24 +48,25 @@ const Profile = ({ params }) => {
     if (profileData) {
       setName(profileData.name);
       setEmail(profileData.email);
-      setIsFriend(userData.friendsName?.includes(id) || false);
-      userData?.friends.some(function (req) {
-        if (req.from_user === id && req.to_user === loggedInUserId) {
+      userData?.friendsName?.forEach((req) => {
+        if (req._id == id) {
+          setIsFriend(true);
+        }
+      });
+      userData?.friends?.forEach((req) => {
+        if (req.from_user._id === id && req.to_user === loggedInUserId) {
           setReceivedRequest(true);
-          console.log(req._id, "frien id");
           setFriendshipId(req._id);
         }
-        if (req.from_user === loggedInUserId && req.to_user === id) {
+        if (req.from_user._id === loggedInUserId && req.to_user === id) {
           setSentRequest(true);
-          console.log(req._id, "frien id");
           setFriendshipId(req._id);
         }
       });
     }
-  }, [profileData]);
+  }, [profileData, userData, loggedInUserId, id]);
 
   const handleAddFriend = async () => {
-    // API call to send friend request
     try {
       const res = await axios.post("/api/add-friend", {
         userId: loggedInUserId,
@@ -64,41 +75,70 @@ const Profile = ({ params }) => {
       });
       setSentRequest(true);
       setFriendshipId(res.data.new_friendship._id);
-      dispatch(addFriend(res.data.new_friendship));
+      dispatch(addFriendship(res.data.new_friendship));
     } catch (err) {
       console.log(err, "Error in adding Friend");
     }
   };
 
   const handleCancelRequest = async () => {
-    console.log(friendshipId, " value");
     try {
-      
       const res = await axios.post("/api/add-friend", {
         friendshipId,
         action: "cancel",
         userId: loggedInUserId,
         profileId: id,
       });
-      if (res.status === 200) {
-        dispatch(removeFriend(friendshipId));
-        setSentRequest(false);
-      }
+      dispatch(removeFriendship(friendshipId));
+      // setReceivedRequest(false);
+      setSentRequest(false);
     } catch (err) {
-      console.log(err, "Error in calcelling request");
+      console.log(err, "Error in cancelling request");
     }
   };
 
   const handleAcceptRequest = async () => {
-    // API call to accept received request
+    try {
+      const res = await axios.post("/api/add-friend", {
+        friendshipId,
+        userId: loggedInUserId,
+        profileId: id,
+        action: "accept",
+      });
+      setReceivedRequest(false);
+      dispatch(addFriend(res.data.newFriend));
+      setIsFriend(true);
+    } catch (err) {
+      console.log(err, "Error in accepting Request");
+    }
   };
 
-  const handleRejectRequest = async () => {
-    // API call to reject received request
+  const handleRemoveFriend = () => {
+    // Show the confirmation modal
+    setShowModal(true);
   };
 
-  const handleRemoveFriend = async () => {
-    // API call to remove friend
+  const confirmRemoveFriend = async () => {
+    try {
+      const res = await axios.post("/api/add-friend", {
+        action: "remove",
+        userId: loggedInUserId,
+        profileId: id,
+      });
+      if (res.status === 200) {
+        dispatch(removeFriend(id));
+        setReceivedRequest(false);
+        setSentRequest(false);
+        setIsFriend(false);
+      }
+    } catch (err) {
+      console.log(err, "Error in removing friend");
+    }
+    setShowModal(false); // Hide modal after confirmation
+  };
+
+  const cancelRemoveFriend = () => {
+    setShowModal(false); // Hide modal on cancel
   };
 
   const handleLogout = useCallback(async () => {
@@ -129,7 +169,7 @@ const Profile = ({ params }) => {
 
       if (response.status === 200) {
         setProfileData(response.data.user);
-        dispatch(setUserData(response.data.user));
+        dispatch(updateUserData(response.data.user));
         setEditing(false);
         setApiLoading(false);
       }
@@ -192,7 +232,7 @@ const Profile = ({ params }) => {
                     Accept Request
                   </button>
                   <button
-                    onClick={handleRejectRequest}
+                    onClick={handleCancelRequest}
                     className="mt-2 px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg shadow-md transition"
                   >
                     Reject Request
@@ -233,6 +273,16 @@ const Profile = ({ params }) => {
             />
           )}
 
+          {/* Render the ConfirmationModal */}
+          {showModal && (
+            <ConfirmationModal
+              message="Are you sure you want to remove this friend?"
+              onConfirm={confirmRemoveFriend}
+              onCancel={cancelRemoveFriend}
+            />
+          )}
+
+          {/* Logout button */}
           <button
             onClick={handleLogout}
             className="mt-6 w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg shadow-md transition"

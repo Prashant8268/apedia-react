@@ -10,8 +10,8 @@ export async function POST(req) {
   await dbConnect();
 
   const token = req.cookies.get("token");
-  const { userId, profileId, action ,friendshipId} = await req.json();
-
+  const { userId, profileId, action, friendshipId } = await req.json();
+  console.log(userId, 'at api')
   try {
     const decode = jwt.verify(token.value, process.env.JWT_SECRET);
     if (userId !== decode.userId)
@@ -74,24 +74,13 @@ export async function POST(req) {
       );
     } else if (action === "cancel") {
       // Cancel the friend request
-      const canceledRequest = await Friendship.findOneAndDelete({
-        from_user: userId,
-        to_user: profileId,
-        status: "pending",
-      });
+      const canceledRequest = await Friendship.findByIdAndDelete(friendshipId);
       await User.findByIdAndUpdate(userId, {
         $pull: { friends: friendshipId },
       });
       await User.findByIdAndUpdate(profileId, {
         $pull: { friends: friendshipId },
       });
-      console.log(friendshipId,canceledRequest,'at api');
-      if (!canceledRequest) {
-        return NextResponse.json(
-          { error: "No pending friend request to cancel" },
-          { status: 400 }
-        );
-      }
 
       return NextResponse.json(
         { message: "Friend request canceled" },
@@ -99,11 +88,11 @@ export async function POST(req) {
       );
     } else if (action === "accept") {
       // Accept the friend request
-      const friendship = await Friendship.findOneAndUpdate(
-        { from_user: profileId, to_user: userId, status: "pending" },
-        { status: "accepted" },
-        { new: true }
-      );
+      const friendship = await Friendship.findByIdAndDelete(friendshipId);
+      fromUser.friendsName.push(profileId);
+      toUser.friendsName.push(userId);
+      fromUser.save();
+      toUser.save();
 
       if (!friendship) {
         return NextResponse.json(
@@ -114,43 +103,32 @@ export async function POST(req) {
 
       // Add both users to each other's friends array
       await User.findByIdAndUpdate(userId, {
-        $addToSet: { friends: profileId },
+        $pull: { friends: friendshipId },
       });
 
       await User.findByIdAndUpdate(profileId, {
-        $addToSet: { friends: userId },
+        $pull: { friends: friendshipId },
       });
 
       return NextResponse.json(
-        { message: "Friend request accepted" },
+        {
+          message: "Friend request accepted",
+          newFriend: {
+            _id: toUser._id,
+            name: toUser.name,
+            email: toUser.email,
+            avatarUrl: toUser.avatarUrl,
+          },
+        },
         { status: 200 }
       );
     } else if (action === "remove") {
       // Remove a friend
-      const removedFriendship = await Friendship.findOneAndDelete({
-        $or: [
-          { from_user: userId, to_user: profileId },
-          { from_user: profileId, to_user: userId },
-        ],
-        status: "accepted",
-      });
-
-      if (!removedFriendship) {
-        return NextResponse.json(
-          { error: "No friendship found to remove" },
-          { status: 400 }
-        );
-      }
-
-      // Remove both users from each other's friends array
-      await User.findByIdAndUpdate(userId, {
-        $pull: { friends: profileId },
-      });
-
-      await User.findByIdAndUpdate(profileId, {
-        $pull: { friends: userId },
-      });
-
+      console.log(fromUser.friendsName, toUser.friendsName, 'value')
+      fromUser.friendsName.pull(profileId);
+      toUser.friendsName.pull(userId);
+      fromUser.save();
+      toUser.save();
       return NextResponse.json({ message: "Friend removed" }, { status: 200 });
     }
 

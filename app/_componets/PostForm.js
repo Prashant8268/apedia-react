@@ -58,7 +58,7 @@ const PostForm = () => {
           value={newPostContent}
           onChange={handleTextChange}
           placeholder="What's on your mind?"
-          className="text-blue  w-full p-3 border border-gray-300 rounded-lg mb-3 focus:outline-none focus:ring focus:ring-blue-300 transition duration-200"
+          className="text-black  w-full p-3 border border-gray-300 rounded-lg mb-3 focus:outline-none focus:ring focus:ring-blue-300 transition duration-200"
           rows="4"
           required
         />

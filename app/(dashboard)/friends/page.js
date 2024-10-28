@@ -8,44 +8,56 @@ import { useFetchFriendsQuery } from "@/redux/features/FriendSlice";
 import SearchBar from "@/app/_componets/SearchBar"; // Import the SearchBar component
 import Link from "next/link"; // Import Link from Next.js
 import { FaSpinner } from "react-icons/fa";
+import { useDispatch } from "react-redux";
+import { addFriend, removeFriendship } from "@/redux/features/UserSlice";
+import axios from "axios";
 const Friends = () => {
   const router = useRouter();
-
+  const dispatch = useDispatch();
+  const isLoading = false;
   // Fetch user data from Redux store
   const userData = useSelector((state) => state.user.userData);
 
-  const {
-    data: friendsData,
-    isLoading,
-    error,
-  } = useFetchFriendsQuery(userData?.id, {
-    skip: !userData?.id,
-  });
-  console.log(friendsData, "data");
-
+  // State to manage friends and friend requests locally
   const [friendRequests, setFriendRequests] = useState([]);
   const [friends, setFriends] = useState([]);
 
+  // Update local state whenever userData changes
   useEffect(() => {
-    if (friendsData) {
-      setFriendRequests(friendsData.friendRequests || []);
-      setFriends(friendsData.friends || []);
+    if (userData) {
+      setFriendRequests(userData.friendRequest || []);
+      setFriends(userData.friendsName || []);
     }
-  }, [friendsData]);
+  }, [userData]);
 
-  const handleAccept = (id) => {
-    const acceptedFriend = friendRequests.find((request) => request.id === id);
-    setFriends([...friends, acceptedFriend]);
-    setFriendRequests(friendRequests.filter((request) => request.id !== id));
+  const handleAccept = async (requestId, profileId) => {
+    try {
+      const res = await axios.post("/api/add-friend", {
+        friendshipId: requestId,
+        userId: userData.id,
+        profileId: profileId,
+        action: "accept",
+      });
+      dispatch(addFriend(res.data.newFriend));
+      dispatch(removeFriendship(requestId));
+      console.log(res, "success");
+    } catch (err) {
+      console.log("Error in accepting request", err);
+    }
   };
 
-  const handleReject = (id) => {
-    setFriendRequests(friendRequests.filter((request) => request.id !== id));
+  const handleReject = async (requestId, profileId) => {
+    try {
+      const res = await axios.post("/api/add-friend", {
+        friendshipId:requestId,
+        action: "cancel",
+        userId: userData.id,
+        profileId,
+      });
+      dispatch(removeFriendship(requestId));
+    } catch (err) {}
   };
 
-  const handleProfileClick = (username) => {
-    router.push(`/profile/${username}`);
-  };
   return (
     <div className="bg-gray-50 p-6 rounded-lg flex justify-center">
       <div className="max-w-md w-full">
@@ -73,28 +85,30 @@ const Friends = () => {
                     className="flex items-center justify-between mb-4 p-2 hover:bg-gray-100 rounded-lg transition"
                   >
                     <div className="flex items-center">
-                      <img
-                        src={request.profilePic}
-                        alt={request.username}
-                        className="w-10 h-10 rounded-full cursor-pointer border border-gray-300"
-                        onClick={() => handleProfileClick(request.username)}
-                      />
-                      <p
-                        className="text-lg font-semibold ml-4 cursor-pointer text-gray-800"
-                        onClick={() => handleProfileClick(request.username)}
-                      >
-                        {request.username}
-                      </p>
+                      <Link href={`/profile/${request.from_user._id}`} passHref>
+                        <div className="flex items-center cursor-pointer">
+                          <img
+                            src={request.from_user.avatarUrl}
+                            alt={request.from_user.name}
+                            className="w-10 h-10 rounded-full border border-gray-300"
+                          />
+                          <p className="text-lg font-semibold ml-4 text-gray-800">
+                            {request.from_user.name}
+                          </p>
+                        </div>
+                      </Link>
                     </div>
                     <div className="flex items-center space-x-2">
                       <button
-                        onClick={() => handleAccept(request.id)}
+                        onClick={() =>
+                          handleAccept(request._id, request.from_user._id)
+                        }
                         className="text-green-500 hover:text-green-700"
                       >
                         <FontAwesomeIcon icon={faCheck} />
                       </button>
                       <button
-                        onClick={() => handleReject(request.id)}
+                        onClick={() => handleReject(request._id,request.from_user._id)}
                         className="text-red-500 hover:text-red-700"
                       >
                         <FontAwesomeIcon icon={faTimes} />
@@ -123,7 +137,10 @@ const Friends = () => {
                       className="flex items-center"
                     >
                       <img
-                        src={friend.avatarUrl}
+                        src={
+                          friend.avatarUrl ||
+                          "https://cdn-icons-png.flaticon.com/512/1077/1077114.png"
+                        }
                         alt={friend.name}
                         className="w-10 h-10 rounded-full cursor-pointer border border-gray-300"
                       />

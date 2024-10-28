@@ -9,10 +9,10 @@ export const postApi = createApi({
       query: () => "/get-posts",
     }),
     toggleLike: builder.mutation({
-      query: ({ id, token }) => ({
+      query: ({ id }) => ({
         url: "/toggle-like",
         method: "POST",
-        body: { id, token, type: "Post" },
+        body: { id, type: "Post" },
       }),
     }),
     deletePost: builder.mutation({

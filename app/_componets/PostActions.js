@@ -63,8 +63,8 @@ const PostActions = ({
                   className="flex items-start justify-between space-x-2 mb-4 border-b border-gray-200 pb-2"
                 >
                   <div className="flex-grow">
-                    <p className="text-sm font-semibold">{comment.user.name}</p>
-                    <p className="text-gray-700 mt-1">{comment.content}</p>
+                    <p className="text-sm text-black font-semibold">{comment.user.name}</p>
+                    <p className=" text-black mt-1">{comment.content}</p>
                   </div>
                   <div className="flex items-center space-x-2">
                     <button
@@ -107,7 +107,7 @@ const PostActions = ({
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               placeholder="Add a comment..."
-              className="flex-grow p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-400 transition duration-200"
+              className="flex-grow text-black p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-400 transition duration-200"
             />
             <button
               type="submit"
