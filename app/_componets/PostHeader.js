@@ -2,20 +2,20 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisV } from "@fortawesome/free-solid-svg-icons";
 import { useState, useRef, useEffect } from "react";
 import axios from "axios";
+import { useDeletePostMutation } from "@/redux/features/postSlice";
 
-const PostHeader = ({ post, handleProfileClick, setPosts }) => {
+const PostHeader = ({ userId, post, handleProfileClick, setPosts }) => {
   const [openPostMenu, setOpenPostMenu] = useState(false);
   const menuRef = useRef(null);
   const postMenuButtonRef = useRef(null);
-
+  const [deletePost] = useDeletePostMutation();
   const handlePostMenu = () => {
     setOpenPostMenu((prev) => !prev);
   };
 
   const handleDeletePost = async () => {
     try {
-      await axios.get(`/api/delete-post/${post._id}`);
-      setPosts((prevPosts) => prevPosts.filter((p) => p._id !== post._id));
+      deletePost(post._id);
     } catch (error) {
       console.error("Error deleting post:", error);
     }
@@ -33,7 +33,6 @@ const PostHeader = ({ post, handleProfileClick, setPosts }) => {
         setOpenPostMenu(false);
       }
     };
-
     // Add event listener to the document
     document.addEventListener("mousedown", handleClickOutside);
 
@@ -63,14 +62,16 @@ const PostHeader = ({ post, handleProfileClick, setPosts }) => {
           {post.user.name}
         </p>
       </div>
-      <button
-        ref={postMenuButtonRef}
-        onClick={handlePostMenu}
-        className="text-gray-500 hover:text-gray-800 focus:outline-none"
-      >
-        <FontAwesomeIcon icon={faEllipsisV} />
-      </button>
-      {openPostMenu && (
+      {userId === post.user._id && (
+        <button
+          ref={postMenuButtonRef}
+          onClick={handlePostMenu}
+          className="text-gray-500 hover:text-gray-800 focus:outline-none"
+        >
+          <FontAwesomeIcon icon={faEllipsisV} />
+        </button>
+      )}
+      {openPostMenu && userId == post.user._id && (
         <div
           ref={menuRef}
           className="absolute right-0 top-10 bg-white border border-gray-300 rounded-lg shadow-lg z-10"

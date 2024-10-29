@@ -10,10 +10,12 @@ export async function middleware(req) {
     // Verify token if it exists
     if (token) {
       jwt.verify(token, process.env.JWT_SECRET);
+      // return NextResponse.next();
     }
   } catch (error) {
     // Handle invalid token: delete it and proceed with redirection
     req.cookies.delete("token");
+    // return NextResponse.redirect(new URL("/signIn", req.url));
   }
 
   // Redirect authenticated users away from sign-in, sign-up, and root page to /posts
@@ -26,8 +28,7 @@ export async function middleware(req) {
       console.log("User is already authenticated, redirecting to /posts");
       return NextResponse.redirect(new URL("/posts", req.url));
     }
-  }
-  else if (
+  } else if (
     url.pathname.startsWith("/posts") ||
     url.pathname === "/profile" ||
     url.pathname === "/chat"

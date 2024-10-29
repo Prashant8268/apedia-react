@@ -10,7 +10,6 @@ const Posts = () => {
   const router = useRouter();
   const { data, error, isLoading } = useGetPostsQuery();
   const posts = data ? data.posts : [];
-
   // Function to handle post deletion
   const handlePostDeleted = (postId) => {
     setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));

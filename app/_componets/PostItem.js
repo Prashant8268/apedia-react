@@ -25,7 +25,7 @@ const PostItem = ({ post: initialPost, setPosts, handleProfileClick }) => {
   const userId = userData?.id;
 
   const [isPostLiked, setIsPostLiked] = useState(
-    post.likes.some((like) => like.user?._id === userId)
+    post?.likes?.some((like) => like?.user?._id === userId)
   );
 
   useEffect(() => {
@@ -33,7 +33,7 @@ const PostItem = ({ post: initialPost, setPosts, handleProfileClick }) => {
   }, [initialPost]);
 
   useEffect(() => {
-    setComments(post.comments);
+    setComments(post?.comments);
   }, [post]);
 
   useEffect(() => {
@@ -54,15 +54,11 @@ const PostItem = ({ post: initialPost, setPosts, handleProfileClick }) => {
     };
   }, []);
 
-  const handlePostMenu = () => {
-    setOpenPostMenu((prev) => !prev);
-  };
-
   const [toggleLike] = useToggleLikeMutation();
 
   const handleLikePost = async () => {
     try {
-      const response = await toggleLike({ id: post._id}).unwrap();
+      const response = await toggleLike({ id: post._id }).unwrap();
       setPost(response.data.likeable);
       setIsPostLiked((prev) => !prev);
     } catch (error) {
@@ -70,14 +66,6 @@ const PostItem = ({ post: initialPost, setPosts, handleProfileClick }) => {
     }
   };
 
-  const handleDeletePost = async () => {
-    try {
-      await axios.delete(`/api/delete-post/${post._id}`);
-      setPosts((prevPosts) => prevPosts.filter((p) => p._id !== post._id));
-    } catch (error) {
-      console.error("Error deleting post:", error);
-    }
-  };
 
   const handleAddComment = async (e) => {
     e.preventDefault();
@@ -98,7 +86,11 @@ const PostItem = ({ post: initialPost, setPosts, handleProfileClick }) => {
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-6 relative ">
-      <PostHeader post={post} handleProfileClick={handleProfileClick} />
+      <PostHeader
+        userId={userId}
+        post={post}
+        handleProfileClick={handleProfileClick}
+      />
       <PostContent post={post} />
       <PostActions
         post={post}

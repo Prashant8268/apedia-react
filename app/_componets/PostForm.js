@@ -1,12 +1,14 @@
 import React, { useState, useRef } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
+import { useAddPostMutation } from "@/redux/features/postSlice";
 
 const PostForm = () => {
   const [newPostContent, setNewPostContent] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [addPost] = useAddPostMutation();
 
   const fileInputRef = useRef(null);
   const user = useSelector((state) => state.user);
@@ -31,9 +33,9 @@ const PostForm = () => {
       if (selectedFile) {
         formData.append("photo", selectedFile);
       }
+      formData.append("user", user);
 
-      const response = await axios.post("/api/newPost", formData);
-      setMessage("Post submitted successfully!");
+      addPost(formData)
       setNewPostContent("");
       setSelectedFile(null);
       fileInputRef.current.value = null;

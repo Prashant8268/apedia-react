@@ -15,14 +15,29 @@ export async function GET(req) {
       const decode = jwt.verify(token.value, process.env.JWT_SECRET);
       userId = decode.userId;
     } catch (err) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+      const response = NextResponse.json(
+        {
+          message: "Unauthorized",
+        },
+        { status: 401 }
+      );
+
+      // Set the token cookie to an empty string with a past expiration date
+      response.cookies.set("token", "", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: -1,
+        path: "/",
+      });
+
+      return response;
     }
     let user = await User.findById(userId)
       .populate({
         path: "friends",
         populate: {
           path: "from_user",
-          select: "name avatarUrl", 
+          select: "name avatarUrl",
         },
       })
       .populate("friendsName", "name avatarUrl");

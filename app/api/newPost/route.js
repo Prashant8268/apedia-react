@@ -18,9 +18,8 @@ export async function POST(req) {
   const decode = jwt.verify(token.value, process.env.JWT_SECRET);
   const userId = decode.userId;
   let user;
-  
-  try {
 
+  try {
     user = jwt.verify(token.value, process.env.JWT_SECRET);
   } catch (error) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -45,7 +44,8 @@ export async function POST(req) {
 
   try {
     const new_post = await Post.create(postDetails);
-    await User.findByIdAndUpdate(
+    await new_post.populate("user", "name email avatarUrl");
+    const user_later = await User.findByIdAndUpdate(
       user.userId,
       { $push: { posts: new_post._id } },
       { new: true }
@@ -53,6 +53,7 @@ export async function POST(req) {
 
     return NextResponse.json({
       message: "Post created successfully",
+      newPost: new_post,
     });
   } catch (err) {
     console.error("Error processing the request:", err);
@@ -66,6 +67,7 @@ export async function POST(req) {
 // Function to upload the photo to S3
 // Function to upload the photo to S3
 import { PutObjectCommand } from "@aws-sdk/client-s3";
+import Email from "next-auth/providers/email";
 // import s3Client from "@/lib/s3Client";
 
 // Function to upload the photo to S3
