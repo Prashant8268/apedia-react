@@ -13,6 +13,7 @@ const SignUp = () => {
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState({});
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
   const validateForm = () => {
     const newErrors = {};
@@ -31,13 +32,16 @@ const SignUp = () => {
     }
 
     try {
+      setLoading(true);
       const response = await axios.post("/api/signup", {
         email,
         password,
         name,
       });
-      if (response) {
+      if (response.data.user) {
         router.push("/signIn");
+      }else{
+        setMessage(response.data.message);
       }
     } catch (error) {
       setMessage(
@@ -149,7 +153,7 @@ const SignUp = () => {
             type="submit"
             className="w-full mb-2 bg-blue-500 text-white font-semibold py-2 px-4 rounded-md transition duration-300 ease-in-out hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
           >
-            Sign Up
+            {loading?"Signing Up":"Sign Up"}
           </button>
         </form>
         <div className="flex justify-center items-center mt-4">

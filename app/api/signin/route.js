@@ -14,7 +14,8 @@ export async function POST(req) {
   await dbConnect();
 
   try {
-    const { email, password } = await req.json();
+    let { email, password } = await req.json();
+    email = email?.toLowerCase();
     if (!email || !password) {
       return NextResponse.json(
         { message: "Email and password are required" },

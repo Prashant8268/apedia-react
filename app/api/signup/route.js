@@ -7,21 +7,14 @@ export async function POST(req, res) {
   if (req.method === "POST") {
     await dbConnect();
 
-    // const multer = require('multer');
-    // const storage = User.uploadedAvatar.storage;
-    // const upload = multer({ storage });
-
-    // upload(req, res, async (err) => {
-    //     if (err) {
-    //         return res.status(500).json({ message: 'Upload error', error: err.message });
-    //     }
-
     const { email, password, name } = await req.json();
 
-    console.log(email, password, name);
-    // const avatar = req.file ? req.file.path : null;
+    // Convert email to lowercase to ensure case-insensitivity
+    const lowerCaseEmail = email?.toLowerCase();
 
-    if (!email || !password || !name) {
+    console.log(lowerCaseEmail, password, name);
+
+    if (!lowerCaseEmail || !password || !name) {
       return NextResponse.json(
         { message: "Missing required fields" },
         { status: 400 }
@@ -29,19 +22,20 @@ export async function POST(req, res) {
     }
 
     try {
-      const existingUser = await User.findOne({ email });
+      // Check if a user already exists with the lowercase email
+      const existingUser = await User.findOne({ email: lowerCaseEmail });
       if (existingUser) {
         return NextResponse.json(
-          { message: "User already exists" },
+          { message: "Email already exists" },
           { status: 200 }
         );
       }
 
+      // Create a new user with the email in lowercase
       const newUser = new User({
-        email,
+        email: lowerCaseEmail,
         password,
         name,
-        // avatar,
       });
 
       await newUser.save();
@@ -56,7 +50,6 @@ export async function POST(req, res) {
         { status: 500 }
       );
     }
-    // });
   } else {
     return NextResponse.setHeader("Allow", ["POST"]);
     return NextResponse.end(`Method ${req.method} not allowed`);

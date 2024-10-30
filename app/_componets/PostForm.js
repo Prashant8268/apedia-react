@@ -33,7 +33,7 @@ const PostForm = () => {
       if (selectedFile) {
         formData.append("photo", selectedFile);
       }
-      formData.append("user", user);
+      formData.user = user;
 
       addPost(formData)
       setNewPostContent("");

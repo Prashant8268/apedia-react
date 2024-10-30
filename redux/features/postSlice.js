@@ -1,5 +1,6 @@
 // redux/postSlice.js
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { comment } from "postcss";
 
 export const postApi = createApi({
   reducerPath: "postApi",
@@ -22,7 +23,17 @@ export const postApi = createApi({
         body: formData,
       }),
       async onQueryStarted(formData, { dispatch, queryFulfilled }) {
-        // Optimistically update cache (optional)
+        const meanwhile = {
+          content: "Posting...",
+          likes:[],
+          comments:[],
+          user: formData.user
+        }
+        const patchResult = dispatch(
+          postApi.util.updateQueryData("getPosts", undefined, (draft) => {
+            draft.posts.unshift({ ...meanwhile, isOptimistic: true }); // Placeholder data until API response
+          })
+        );
 
         try {
           // Await the actual response
